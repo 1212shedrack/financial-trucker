@@ -1,0 +1,2 @@
+[tool.vercel]
+entrypoint = "personal_finance.asgi:application"
