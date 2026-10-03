@@ -250,9 +250,6 @@ ALLOWED_DOCUMENT_TYPES = ['application/pdf']
 DEFAULT_CURRENCY = 'TZS'
 CURRENCY_SYMBOL = 'TSh'
 
-LOG_DIR = BASE_DIR / 'logs'
-LOG_DIR.mkdir(exist_ok=True)
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -267,23 +264,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'pfams.log',
-            'maxBytes': 10 * 1024 * 1024,
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'encoding': 'utf-8',
-        },
     },
     'root': {
         'handlers': ['console'],
         'level': 'DEBUG' if DEBUG else 'WARNING',
     },
     'loggers': {
-        'django': {'handlers': ['console', 'file'],
+        'django': {'handlers': ['console'],
                    'level': 'WARNING', 'propagate': False},
-        'pfams': {'handlers': ['console', 'file'],
+        'pfams': {'handlers': ['console'],
                   'level': 'DEBUG', 'propagate': False},
     },
 }
