@@ -7,9 +7,6 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
 
 from decouple import config, Csv
-from django.utils.translation import gettext_lazy as _
-
-
 def build_database_config():
     """Return a Django DATABASES config that supports SQLite or Supabase PostgreSQL."""
     default_engine = 'django.db.backends.sqlite3'
@@ -180,8 +177,8 @@ USE_I18N = True
 USE_TZ = True
 
 LANGUAGES = [
-    ('en', _('English')),
-    ('sw', _('Swahili')),
+    ('en', 'English'),
+    ('sw', 'Swahili'),
 ]
 LOCALE_PATHS = [BASE_DIR / 'locale']
 
