@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Categories" %}{% endblock %}
+{% block page_title %}{% trans "Categories" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Transaction Categories" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Organize your income and expenses into meaningful categories" %}</p>
+  </div>
+  <a href="{% url 'category_create' %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> {% trans "Add Category" %}</a>
+</div>
+
+<div class="row g-4">
+  <!-- Custom Categories -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-transparent py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-person-gear text-success me-2"></i>{% trans "My Custom Categories" %}</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr><th>{% trans "Icon" %}</th><th>{% trans "Name" %}</th><th>{% trans "Type" %}</th><th class="text-end">{% trans "Actions" %}</th></tr></thead>
+          <tbody>
+            {% for cat in user_categories %}
+            <tr>
+              <td style="width: 40px;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: {{ cat.color }}20; color: {{ cat.color }};">
+                  <i class="bi {{ cat.icon }}"></i>
+                </div>
+              </td>
+              <td class="fw-semibold">{{ cat.name }}</td>
+              <td><span class="badge bg-light text-dark border">{{ cat.get_category_type_display }}</span></td>
+              <td class="text-end">
+                <a href="{% url 'category_edit' cat.pk %}" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'category_delete' cat.pk %}" class="d-inline" onsubmit="return confirm('{% trans "Delete this category?" %}');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center py-4 text-muted small">{% trans "No custom categories created yet." %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Categories -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-transparent py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-shield-check text-primary me-2"></i>{% trans "System Default Categories" %}</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead><tr><th>{% trans "Icon" %}</th><th>{% trans "Name" %}</th><th>{% trans "Type" %}</th><th>{% trans "Status" %}</th></tr></thead>
+          <tbody>
+            {% for cat in default_categories %}
+            <tr>
+              <td style="width: 40px;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: {{ cat.color }}20; color: {{ cat.color }};">
+                  <i class="bi {{ cat.icon }}"></i>
+                </div>
+              </td>
+              <td class="fw-semibold">{{ cat.name }}</td>
+              <td><span class="badge bg-light text-dark border">{{ cat.get_category_type_display }}</span></td>
+              <td><span class="badge bg-success bg-opacity-10 text-success">{% trans "Default" %}</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center py-4 text-muted small">{% trans "No system default categories found." %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

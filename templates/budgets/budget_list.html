@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Budgets" %}{% endblock %}
+{% block page_title %}{% trans "Budget Planner" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Budget Monitoring" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Set spending limits by category to keep expenses on track" %}</p>
+  </div>
+  <a href="{% url 'budget_create' %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> {% trans "Create Budget" %}</a>
+</div>
+
+<div class="row g-4">
+  {% for budget in budgets %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm h-100 p-3">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: {{ budget.category.color }}20; color: {{ budget.category.color }};">
+            <i class="bi {{ budget.category.icon }}"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-0">{{ budget.category.name }}</h6>
+            <small class="text-muted">{{ budget.get_period_display }}</small>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'budget_detail' budget.pk %}"><i class="bi bi-eye me-2"></i>{% trans "Details" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'budget_edit' budget.pk %}"><i class="bi bi-pencil me-2"></i>{% trans "Edit" %}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{% url 'budget_delete' budget.pk %}" onsubmit="return confirm('{% trans "Delete this budget?" %}');">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>{% trans "Delete" %}</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="my-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span class="text-muted">{% trans "Spent" %}: <strong>{{ budget.spent_amount|currency }}</strong></span>
+          <span class="text-muted">{% trans "Limit" %}: <strong>{{ budget.amount|currency }}</strong></span>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-{{ budget.status_class }}" style="width: {{ budget.percentage_used }}%;"></div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center small mt-auto pt-2 border-top">
+        <span class="badge bg-{{ budget.status_class }}">{{ budget.percentage_used }}% {% trans "Used" %}</span>
+        <span class="{% if budget.remaining_amount >= 0 %}text-muted{% else %}text-danger fw-bold{% endif %}">
+          {% if budget.remaining_amount >= 0 %}
+            {{ budget.remaining_amount|currency }} {% trans "left" %}
+          {% else %}
+            {% trans "Over by" %} {{ budget.remaining_amount|absolute_value|currency }}
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="card shadow-sm p-5 text-center text-muted">
+      <i class="bi bi-pie-chart fs-1 d-block mb-3 text-secondary"></i>
+      <h5>{% trans "No Budgets Defined" %}</h5>
+      <p class="small text-muted mb-3">{% trans "Create category spending budgets to monitor your outflows automatically." %}</p>
+      <div><a href="{% url 'budget_create' %}" class="btn btn-success">{% trans "Create a Budget" %}</a></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Backup & Restore System Data" %}{% endblock %}
+{% block page_title %}{% trans "Backup & Restore Data" %}{% endblock %}
+
+{% block content %}
+<div class="row g-4 justify-content-center">
+  <!-- Export Backup Card -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-success text-white">
+        <h6 class="mb-0"><i class="bi bi-download me-2"></i>{% trans "Create & Export Backup" %}</h6>
+      </div>
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <p class="text-muted small">
+            {% trans "Export a complete JSON backup of all your personal financial data including incomes, expenses, categories, budgets, savings goals, accounts, and debts." %}
+          </p>
+          <div class="alert alert-success py-2 small">
+            <i class="bi bi-shield-check me-1"></i> {% trans "Data is encrypted in transit and exported directly to your computer." %}
+          </div>
+        </div>
+        <div class="mt-3">
+          <a href="{% url 'backup_export' %}" class="btn btn-success w-100">
+            <i class="bi bi-cloud-download me-2"></i>{% trans "Download Complete Backup (JSON)" %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Restore Backup Card -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-primary text-white">
+        <h6 class="mb-0"><i class="bi bi-upload me-2"></i>{% trans "Restore from Backup" %}</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small">
+          {% trans "Upload a previously exported PFAMS JSON backup file to restore your transactions and financial goals." %}
+        </p>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">{% trans "Select Backup File (.json)" %}</label>
+            <input type="file" name="backup_file" class="form-control" accept=".json" required>
+          </div>
+          <div class="alert alert-warning py-2 small">
+            <i class="bi bi-exclamation-triangle me-1"></i> {% trans "Restoring will merge transactions into your account without overwriting existing unique entries." %}
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-cloud-upload me-2"></i>{% trans "Upload & Restore Backup" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

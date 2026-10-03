@@ -1,0 +1,81 @@
+{% extends 'auth_base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-md-6 col-lg-5 col-xl-4">
+    <div class="card shadow-sm p-4">
+      <div class="text-center mb-4">
+        <div class="avatar-lg bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px;">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <h4 class="fw-bold">{% trans "Welcome Back" %}</h4>
+        <p class="text-muted small">{% trans "Sign in to your PFAMS account" %}</p>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">{% trans "Username" %}</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label small fw-semibold mb-0">{% trans "Password" %}</label>
+            <a href="{% url 'password_reset' %}" class="small text-decoration-none">{% trans "Forgot password?" %}</a>
+          </div>
+          <div class="input-group">
+            {{ form.password }}
+            <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1" title="{% trans "Show/Hide password" %}">
+              <i class="bi bi-eye" id="togglePasswordIcon"></i>
+            </button>
+          </div>
+          {% if form.password.errors %}
+            <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3 form-check">
+          {{ form.remember_me }}
+          <label class="form-check-label small" for="{{ form.remember_me.id_for_label }}">{% trans "Remember me" %}</label>
+        </div>
+
+        <div class="d-grid mb-3">
+          <button type="submit" class="btn btn-success fw-semibold">{% trans "Sign In" %}</button>
+        </div>
+
+        <div class="text-center small text-muted">
+          {% trans "Don't have an account?" %} <a href="{% url 'register' %}" class="text-success fw-semibold text-decoration-none">{% trans "Create Account" %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const toggleBtn  = document.getElementById('togglePassword');
+  const toggleIcon = document.getElementById('togglePasswordIcon');
+  const pwdInput   = document.getElementById('{{ form.password.id_for_label }}');
+
+  toggleBtn.addEventListener('click', function () {
+    const isHidden = pwdInput.type === 'password';
+    pwdInput.type  = isHidden ? 'text' : 'password';
+    toggleIcon.classList.toggle('bi-eye',      !isHidden);
+    toggleIcon.classList.toggle('bi-eye-slash', isHidden);
+  });
+</script>
+{% endblock %}

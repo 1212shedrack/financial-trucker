@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load finance_tags %}
+
+{% block title %}Delete Income{% endblock %}
+{% block page_title %}Delete Confirmation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm p-4 text-center">
+      <div class="text-danger display-4 mb-3"><i class="bi bi-exclamation-triangle"></i></div>
+      <h5 class="fw-bold mb-2">Delete Income Record?</h5>
+      <p class="text-muted small mb-4">
+        Are you sure you want to delete the income record for <strong>{{ object.source }}</strong> ({{ object.amount|currency }}) dated {{ object.date }}? This action cannot be undone.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{% url 'income_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

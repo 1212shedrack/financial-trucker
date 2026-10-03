@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ action }} {% trans "Goal" %}{% endblock %}
+{% block page_title %}{{ action }} {% trans "Savings Goal" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">{{ action }} {% trans "Savings Goal" %}</h5>
+        <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}</a>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>
+        {% endif %}
+
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label small fw-semibold">{% trans "Goal Name" %} *</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Category" %}</label>
+            {{ form.category }}
+            {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Target Amount (TZS)" %} *</label>
+            <div class="input-group">
+              <span class="input-group-text">TSh</span>
+              {{ form.target_amount }}
+            </div>
+            {% if form.target_amount.errors %}<div class="text-danger small mt-1">{{ form.target_amount.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Target Date" %}</label>
+            {{ form.target_date }}
+            {% if form.target_date.errors %}<div class="text-danger small mt-1">{{ form.target_date.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-semibold">{% trans "Description / Purpose" %}</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 text-end mt-4">
+            <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary me-2">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-success fw-semibold px-4">{% trans "Save Goal" %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

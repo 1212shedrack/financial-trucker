@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Financial Analytics" %}{% endblock %}
+{% block page_title %}{% trans "Financial Analytics & Insights" %}{% endblock %}
+
+{% block content %}
+<!-- Range filter -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Analytics Dashboard" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Deep statistical analysis powered by Pandas & NumPy" %}</p>
+  </div>
+  <div class="d-flex gap-1 flex-wrap">
+    <a href="?range=today" class="btn btn-sm {% if range_param == 'today' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "Today" %}</a>
+    <a href="?range=week" class="btn btn-sm {% if range_param == 'week' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "7 Days" %}</a>
+    <a href="?range=month" class="btn btn-sm {% if range_param == 'month' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "This Month" %}</a>
+    <a href="?range=last_month" class="btn btn-sm {% if range_param == 'last_month' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "Last Month" %}</a>
+    <a href="?range=year" class="btn btn-sm {% if range_param == 'year' %}btn-success{% else %}btn-outline-secondary{% endif %}">{% trans "This Year" %}</a>
+  </div>
+</div>
+
+<!-- Metrics row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm p-3 border-start border-success border-4">
+      <div class="text-muted small text-uppercase fw-semibold">{% trans "Total Inflows" %}</div>
+      <div class="h4 fw-bold text-success mt-1 mb-0">{{ summary.total_income|currency }}</div>
+      <small class="text-muted">{{ summary.income_count }} {% trans "transactions" %}</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm p-3 border-start border-danger border-4">
+      <div class="text-muted small text-uppercase fw-semibold">{% trans "Total Outflows" %}</div>
+      <div class="h4 fw-bold text-danger mt-1 mb-0">{{ summary.total_expenses|currency }}</div>
+      <small class="text-muted">{{ summary.expense_count }} {% trans "transactions" %}</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm p-3 border-start border-info border-4">
+      <div class="text-muted small text-uppercase fw-semibold">{% trans "Net Savings" %}</div>
+      <div class="h4 fw-bold {% if summary.net_savings >= 0 %}text-info{% else %}text-danger{% endif %} mt-1 mb-0">
+        {{ summary.net_savings|currency }}
+      </div>
+      <small class="text-muted">{% trans "Savings rate" %}: <strong>{{ summary.savings_rate }}%</strong></small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm p-3 border-start border-warning border-4">
+      <div class="text-muted small text-uppercase fw-semibold">{% trans "Daily Avg Burn" %}</div>
+      <div class="h4 fw-bold text-dark mt-1 mb-0">{{ summary.avg_daily_spending|currency }}</div>
+      <small class="text-muted">Top: {{ summary.top_category|default:"N/A" }}</small>
+    </div>
+  </div>
+</div>
+
+<!-- Anomalies Alert -->
+{% if anomalies %}
+<div class="alert alert-warning shadow-sm border-0 mb-4">
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <i class="bi bi-exclamation-octagon-fill fs-5 text-warning"></i>
+    <h6 class="fw-bold mb-0">{% trans "Statistical Anomalies Detected (Z-Score > 2.0)" %}</h6>
+  </div>
+  <p class="small mb-2 text-muted">{% trans "The system detected unusually high spending on the following dates compared to your baseline:" %}</p>
+  <ul class="mb-0 small">
+    {% for a in anomalies %}
+      <li>
+        <strong>{{ a.date }}</strong>: {% trans "Spent" %} <strong>{{ a.total_amount|currency }}</strong> (Z-Score: {{ a.z_score }}x {% trans "higher than standard deviation" %})
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<!-- Hidden i18n strings for JS chart labels -->
+<span id="i18n-income"      class="d-none">{% trans "Income" %}</span>
+<span id="i18n-expense"     class="d-none">{% trans "Expense" %}</span>
+<span id="i18n-net-savings" class="d-none">{% trans "Net Savings" %}</span>
+
+<!-- Charts Grid -->
+<div class="row g-4 mb-4">
+  <!-- Monthly Trend -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="fw-bold mb-3"><i class="bi bi-graph-up text-success me-2"></i>{% trans "12-Month Inflow / Outflow / Savings Curve" %}</h6>
+      <div class="chart-container chart-tall">
+        <canvas id="monthlyTrendAnalytics"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart text-danger me-2"></i>{% trans "Expense by Category" %}</h6>
+      <div class="chart-container chart-compact">
+        <canvas id="categoryDonutAnalytics"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods Distribution -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="fw-bold mb-3"><i class="bi bi-credit-card text-primary me-2"></i>{% trans "Payment Channel Distribution" %}</h6>
+      <div class="chart-container chart-compact">
+        <canvas id="paymentDistChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income Sources -->
+  <div class="col-lg-6">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="fw-bold mb-3"><i class="bi bi-wallet text-success me-2"></i>{% trans "Income Streams" %}</h6>
+      <div class="chart-container chart-compact">
+        <canvas id="incomeSourcesChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const trendsData    = {{ monthly_trends_json|safe }};
+const categoriesData = {{ category_breakdown_json|safe }};
+const paymentData   = {{ payment_dist_json|safe }};
+const incomeData   = {{ income_sources_json|safe }};
+const analyticsCharts = [];
+const analyticsChartTheme = () => window.ThemeManager?.colors?.() || {
+  text: '#212529', muted: '#6c757d', border: '#dee2e6', grid: '#e9ecef'
+};
+const applyAnalyticsChartTheme = () => {
+  const theme = analyticsChartTheme();
+  analyticsCharts.forEach(chart => {
+    if (chart.options.plugins.legend?.labels) chart.options.plugins.legend.labels.color = theme.text;
+    if (chart.options.scales?.x) {
+      chart.options.scales.x.ticks.color = theme.muted;
+      chart.options.scales.x.grid.color = theme.grid;
+    }
+    if (chart.options.scales?.y) {
+      chart.options.scales.y.ticks.color = theme.muted;
+      chart.options.scales.y.grid.color = theme.grid;
+    }
+    chart.update('none');
+  });
+};
+document.addEventListener('pfams:themechange', applyAnalyticsChartTheme);
+
+// Read translated labels from hidden DOM elements
+const labelIncome     = document.getElementById('i18n-income')?.textContent     || 'Income';
+const labelExpense    = document.getElementById('i18n-expense')?.textContent    || 'Expense';
+const labelNetSavings = document.getElementById('i18n-net-savings')?.textContent || 'Net Savings';
+
+// 1. Monthly Trends
+const mtCtx = document.getElementById('monthlyTrendAnalytics');
+if (mtCtx && trendsData.labels) {
+  analyticsCharts.push(new Chart(mtCtx, {
+    type: 'bar',
+    data: {
+      labels: trendsData.labels,
+      datasets: [
+        { label: labelIncome,     data: trendsData.income_data,  backgroundColor: '#198754', borderRadius: 4 },
+        { label: labelExpense,    data: trendsData.expense_data, backgroundColor: '#dc3545', borderRadius: 4 },
+        { label: labelNetSavings, data: trendsData.savings_data, type: 'line', borderColor: '#0dcaf0', tension: 0.3, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { boxWidth: 12, padding: 12, usePointStyle: true, color: analyticsChartTheme().text } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': TSh ' + ctx.raw.toLocaleString() } }
+      },
+      scales: { x: { ticks: { maxRotation: 45, autoSkip: true, color: analyticsChartTheme().muted }, grid: { color: analyticsChartTheme().grid } }, y: { ticks: { maxTicksLimit: 6, color: analyticsChartTheme().muted }, grid: { color: analyticsChartTheme().grid } } }
+    }
+  }));
+}
+
+// 2. Category Donut
+const catCtx = document.getElementById('categoryDonutAnalytics');
+if (catCtx && categoriesData.length > 0) {
+  analyticsCharts.push(new Chart(catCtx, {
+    type: 'doughnut',
+    data: {
+      labels: categoriesData.map(d => d.category),
+      datasets: [{ data: categoriesData.map(d => d.amount), backgroundColor: ['#198754','#dc3545','#0dcaf0','#ffc107','#6610f2','#0d6efd','#fd7e14','#e83e8c','#20c997','#6c757d'] }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, usePointStyle: true, color: analyticsChartTheme().text } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': TSh ' + ctx.raw.toLocaleString() } }
+      }
+    }
+  }));
+}
+
+// 3. Payment Distribution
+const payCtx = document.getElementById('paymentDistChart');
+if (payCtx && paymentData.length > 0) {
+  analyticsCharts.push(new Chart(payCtx, {
+    type: 'pie',
+    data: {
+      labels: paymentData.map(d => d.method),
+      datasets: [{ data: paymentData.map(d => d.amount), backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6610f2','#0dcaf0','#6c757d'] }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, usePointStyle: true, color: analyticsChartTheme().text } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': TSh ' + ctx.raw.toLocaleString() } }
+      }
+    }
+  }));
+}
+
+// 4. Income Sources
+const incCtx = document.getElementById('incomeSourcesChart');
+if (incCtx && incomeData.length > 0) {
+  analyticsCharts.push(new Chart(incCtx, {
+    type: 'polarArea',
+    data: {
+      labels: incomeData.map(d => d.source),
+      datasets: [{ data: incomeData.map(d => d.amount), backgroundColor: ['#19875480','#0dcaf080','#0d6efd80','#ffc10780','#6610f280'] }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, usePointStyle: true, color: analyticsChartTheme().text } },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': TSh ' + ctx.raw.toLocaleString() } }
+      }
+    }
+  }));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block page_title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block content %}
+<form method="get" class="card shadow-sm mb-4 auto-filter-form">
+  <div class="card-body p-3 p-md-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="transaction-type" class="form-label small fw-semibold text-uppercase text-muted">{% trans "Transaction Type" %}</label>
+        <select id="transaction-type" name="type" class="form-select">
+          <option value="all" {% if type == 'all' %}selected{% endif %}>{% trans "All Transactions" %}</option>
+          <option value="income" {% if type == 'income' %}selected{% endif %}>{% trans "Income" %}</option>
+          <option value="expense" {% if type == 'expense' %}selected{% endif %}>{% trans "Expenses" %}</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="period-filter" class="form-label small fw-semibold text-uppercase text-muted">{% trans "Period" %}</label>
+        <select id="period-filter" name="period" class="form-select">
+          <option value="today" {% if period == 'today' %}selected{% endif %}>{% trans "Today" %}</option>
+          <option value="week" {% if period == 'week' %}selected{% endif %}>{% trans "This Week" %}</option>
+          <option value="month" {% if period == 'month' %}selected{% endif %}>{% trans "This Month" %}</option>
+          <option value="year" {% if period == 'year' %}selected{% endif %}>{% trans "This Year" %}</option>
+          <option value="custom" {% if period == 'custom' %}selected{% endif %}>{% trans "Custom Range" %}</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex gap-2 justify-content-md-end">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-100">{% trans "Reset" %}</a>
+      </div>
+    </div>
+
+    <div id="custom-range-fields" class="row g-3 mt-1 {% if period != 'custom' %}d-none{% endif %}">
+      <div class="col-md-6">
+        <label for="start-date" class="form-label small fw-semibold text-uppercase text-muted">{% trans "Start Date" %}</label>
+        <input id="start-date" type="date" name="start_date" value="{{ date_from|date:'Y-m-d' }}" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label for="end-date" class="form-label small fw-semibold text-uppercase text-muted">{% trans "End Date" %}</label>
+        <input id="end-date" type="date" name="end_date" value="{{ date_to|date:'Y-m-d' }}" class="form-control">
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-center small text-muted mb-3">
+  <span><strong>{% trans "Selected range" %}:</strong> {{ date_from|date:'M d, Y' }} — {{ date_to|date:'M d, Y' }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 metric-col">
+    <div class="card summary-card income h-100 p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="card-icon"><i class="bi bi-arrow-down-circle"></i></div>
+        <small class="text-muted fw-semibold text-uppercase">{% trans "Total Income" %}</small>
+      </div>
+      <div class="amount text-success">{{ total_income|currency }}</div>
+      <small class="text-muted">{{ summary.income_count }} {% trans "record" %}{{ summary.income_count|pluralize }}</small>
+    </div>
+  </div>
+  <div class="col-6 metric-col">
+    <div class="card summary-card expense h-100 p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="card-icon"><i class="bi bi-arrow-up-circle"></i></div>
+        <small class="text-muted fw-semibold text-uppercase">{% trans "Total Expenses" %}</small>
+      </div>
+      <div class="amount text-danger">{{ total_expenses|currency }}</div>
+      <small class="text-muted">{{ summary.expense_count }} {% trans "record" %}{{ summary.expense_count|pluralize }}</small>
+    </div>
+  </div>
+  <div class="col-6 metric-col">
+    <div class="card summary-card savings h-100 p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="card-icon"><i class="bi bi-piggy-bank"></i></div>
+        <small class="text-muted fw-semibold text-uppercase">{% trans "Total Balance" %}</small>
+      </div>
+      <div class="amount {% if total_balance >= 0 %}text-info{% else %}text-danger{% endif %}">{{ total_balance|currency }}</div>
+      <small class="text-muted">{% trans "Net savings" %}: <strong class="{% if net_savings >= 0 %}text-success{% else %}text-danger{% endif %}">{{ net_savings|currency }}</strong></small>
+    </div>
+  </div>
+  <div class="col-6 metric-col">
+    <div class="card summary-card balance h-100 p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="card-icon"><i class="bi bi-wallet2"></i></div>
+        <small class="text-muted fw-semibold text-uppercase">{% trans "Average Expense" %}</small>
+      </div>
+      <div class="amount text-primary">{{ summary.average_expense|default:0|currency }}</div>
+      <small class="text-muted">{% trans "Filtered expenses" %}</small>
+    </div>
+  </div>
+  <div class="col-6 metric-col">
+    <div class="card summary-card balance h-100 p-3">
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <div class="card-icon"><i class="bi bi-list-check"></i></div>
+        <small class="text-muted fw-semibold text-uppercase">{% trans "Transaction Count" %}</small>
+      </div>
+      <div class="amount text-dark">{{ summary.transaction_count }}</div>
+      <small class="text-muted">{% trans "Matching transactions" %}</small>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Monthly Trends Chart -->
+  <div class="col-lg-8">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-bar-chart-line me-2 text-success"></i>{% trans "Monthly Trends" %}</h6>
+      </div>
+      <div class="chart-container chart-tall">
+        <canvas id="monthlyTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <!-- Category Donut -->
+  <div class="col-lg-4">
+    <div class="card p-3 h-100">
+      <h6 class="fw-semibold mb-3"><i class="bi bi-pie-chart me-2 text-danger"></i>{% trans "Expense Breakdown" %}</h6>
+      <div class="chart-container chart-compact">
+        <canvas id="categoryDonutChart"></canvas>
+      </div>
+      {% if category_breakdown %}
+      <ul class="list-unstyled mt-3 mb-0 small">
+        {% for item in category_breakdown|slice:":5" %}
+        <li class="d-flex justify-content-between py-1 border-bottom">
+          <span>{{ item.category }}</span>
+          <span class="fw-semibold">{{ item.percentage }}%</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-muted text-center py-3 small">{% trans "No expense data yet" %}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Insights -->
+  <div class="col-lg-5">
+    <div class="card p-3 h-100">
+      <h6 class="fw-semibold mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i>{% trans "Insights" %}</h6>
+      {% if insights %}
+        {% for insight in insights %}
+        <div class="insight-card {{ insight.severity }}">
+          <i class="bi {{ insight.icon }} fs-5 flex-shrink-0"></i>
+          <div>
+            <div class="fw-semibold small">{{ insight.title }}</div>
+            <div class="text-muted small">{{ insight.message }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted text-center py-3">{% trans "Add transactions to get personalized insights." %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Budgets -->
+  <div class="col-lg-7">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i>{% trans "Budget Status" %}</h6>
+        <a href="{% url 'budget_list' %}" class="btn btn-sm btn-outline-primary">{% trans "Manage" %}</a>
+      </div>
+      {% if budgets %}
+        {% for budget in budgets %}
+        <div class="budget-progress mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small fw-semibold">{{ budget.category.name }}</span>
+            <small class="text-muted">{{ budget.spent_amount|currency }} / {{ budget.amount|currency }}</small>
+          </div>
+          <div class="progress">
+            <div class="progress-bar bg-{{ budget.status_class }}" style="width:{{ budget.percentage_used }}%"></div>
+          </div>
+          <small class="text-{{ budget.status_class }}">{{ budget.percentage_used }}% used</small>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted text-center py-3 small">{% trans "No budgets set." %} <a href="{% url 'budget_create' %}">{% trans "Create one" %}</a></p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Recent Transactions -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-clock-history me-2"></i>{% trans "Recent Transactions" %}</h6>
+        <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline-secondary">{% trans "View All" %}</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Description" %}</th><th>{% trans "Category" %}</th><th class="text-end">{% trans "Amount" %}</th></tr></thead>
+          <tbody>
+            {% for t in recent_transactions %}
+            <tr>
+              <td><small class="text-muted">{{ t.obj.date|date:"M d" }}</small></td>
+              <td>
+                <span class="type-pill {% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %} me-1">{{ t.type|capfirst }}</span>
+                {% if t.type == 'income' %}{{ t.obj.source|truncatechars:25 }}{% else %}{{ t.obj.description|truncatechars:25 }}{% endif %}
+              </td>
+              <td><small class="text-muted">{{ t.obj.category.name|default:"—" }}</small></td>
+              <td class="text-end fw-semibold {% if t.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                {% if t.type == 'expense' %}-{% endif %}{{ t.obj.amount|currency }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted py-4">{% trans "No transactions yet." %} <a href="{% url 'income_create' %}">{% trans "Add income" %}</a> {% trans "or" %} <a href="{% url 'expense_create' %}">{% trans "add expense" %}</a></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Goals -->
+  <div class="col-lg-5">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-semibold mb-0"><i class="bi bi-bullseye me-2 text-success"></i>{% trans "Savings Goals" %}</h6>
+        <a href="{% url 'goal_list' %}" class="btn btn-sm btn-outline-success">{% trans "Manage" %}</a>
+      </div>
+      {% for goal in goals %}
+      <div class="goal-card card p-3 mb-2">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="fw-semibold small">{{ goal.name|truncatechars:22 }}</span>
+          <span class="badge bg-{{ goal.status_class }}">{{ goal.percentage_completed }}%</span>
+        </div>
+        <div class="progress mb-1" style="height:6px">
+          <div class="progress-bar bg-{{ goal.status_class }}" style="width:{{ goal.percentage_completed }}%"></div>
+        </div>
+        <small class="text-muted">{{ goal.current_amount|currency }} of {{ goal.target_amount|currency }}</small>
+      </div>
+      {% empty %}
+      <p class="text-muted text-center py-3 small">{% trans "No goals yet." %} <a href="{% url 'goal_create' %}">{% trans "Create one" %}</a></p>
+      {% endfor %}
+    </div>
+  <!-- Hidden i18n strings for Dashboard Chart Labels -->
+<span id="dash-i18n-income"   class="d-none">{% trans "Income" %}</span>
+<span id="dash-i18n-expenses" class="d-none">{% trans "Expenses" %}</span>
+<span id="dash-i18n-savings"  class="d-none">{% trans "Savings" %}</span>
+{{ monthly_trends|json_script:"monthly-trends-data" }}
+{{ category_breakdown|json_script:"category-breakdown-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const monthlyDataEl = document.getElementById('monthly-trends-data');
+const categoryDataEl = document.getElementById('category-breakdown-data');
+const monthlyData = monthlyDataEl ? JSON.parse(monthlyDataEl.textContent) : { labels: [], income_data: [], expense_data: [] };
+const categoryData = categoryDataEl ? JSON.parse(categoryDataEl.textContent) : [];
+
+const labelIncome   = document.getElementById('dash-i18n-income')?.textContent   || 'Income';
+const labelExpenses = document.getElementById('dash-i18n-expenses')?.textContent || 'Expenses';
+const dashboardChartTheme = () => window.ThemeManager?.colors?.() || {
+  text: '#212529', muted: '#6c757d', border: '#dee2e6', grid: '#e9ecef'
+};
+const applyDashboardChartTheme = () => {
+  const theme = dashboardChartTheme();
+  if (window.__monthlyTrendChartInstance) {
+    const chart = window.__monthlyTrendChartInstance;
+    chart.options.plugins.legend.labels.color = theme.text;
+    chart.options.scales.x.ticks.color = theme.muted;
+    chart.options.scales.y.ticks.color = theme.muted;
+    chart.options.scales.x.grid.color = theme.grid;
+    chart.options.scales.y.grid.color = theme.grid;
+    chart.update('none');
+  }
+  if (window.__categoryDonutChartInstance) {
+    const chart = window.__categoryDonutChartInstance;
+    chart.options.plugins.legend.labels.color = theme.text;
+    chart.update('none');
+  }
+};
+document.addEventListener('pfams:themechange', applyDashboardChartTheme);
+
+const trendCtx = document.getElementById('monthlyTrendChart');
+if (trendCtx) {
+  if (window.__monthlyTrendChartInstance) {
+    window.__monthlyTrendChartInstance.destroy();
+  }
+
+  const labels = monthlyData.labels || [];
+  const incomeSeries = monthlyData.income_data || monthlyData.income || [];
+  const expenseSeries = monthlyData.expense_data || monthlyData.expenses || [];
+  const hasValues = labels.length && (incomeSeries.some(v => Number(v) > 0) || expenseSeries.some(v => Number(v) > 0));
+
+  if (hasValues) {
+    window.__monthlyTrendChartInstance = new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: labelIncome, data: incomeSeries, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.15)', borderWidth: 3, pointRadius: 4, tension: 0.25 },
+          { label: labelExpenses, data: expenseSeries, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.12)', borderWidth: 3, pointRadius: 4, tension: 0.25 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { color: dashboardChartTheme().text } },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `${ctx.dataset.label}: TSh ${Number(ctx.parsed.y || 0).toLocaleString()}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            ticks: {
+              color: dashboardChartTheme().muted,
+              callback: (value) => `TSh ${Number(value).toLocaleString()}`
+            }, grid: { color: dashboardChartTheme().grid },
+          },
+          x: {
+            ticks: { color: dashboardChartTheme().muted },
+            grid: { color: dashboardChartTheme().grid }
+          },
+          
+        }
+      }
+    });
+  } else {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'text-muted text-center py-5';
+    emptyState.textContent = '{% trans "No monthly transaction data available for this period." %}';
+    trendCtx.parentNode.innerHTML = '';
+    trendCtx.parentNode.appendChild(emptyState);
+  }
+}
+
+const donutCtx = document.getElementById('categoryDonutChart');
+if (donutCtx && categoryData.length > 0) {
+  if (window.__categoryDonutChartInstance) {
+    window.__categoryDonutChartInstance.destroy();
+  }
+  const colors = ['#198754','#dc3545','#0dcaf0','#ffc107','#6610f2','#0d6efd','#fd7e14','#e83e8c','#20c997','#6c757d'];
+  window.__categoryDonutChartInstance = new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: categoryData.map(d => d.category),
+      datasets: [{ data: categoryData.map(d => d.amount), backgroundColor: colors, borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false, labels: { color: dashboardChartTheme().text } }, tooltip: { callbacks: { label: ctx => `${ctx.label}: TSh ${Number(ctx.raw || 0).toLocaleString()}` } } },
+      cutout: '70%',
+    }
+  });
+}
+
+const periodSelect = document.getElementById('period-filter');
+const customRangeFields = document.getElementById('custom-range-fields');
+if (periodSelect && customRangeFields) {
+  const updateCustomRangeVisibility = () => {
+    customRangeFields.classList.toggle('d-none', periodSelect.value !== 'custom');
+  };
+  periodSelect.addEventListener('change', updateCustomRangeVisibility);
+  updateCustomRangeVisibility();
+}
+</script>
+{% endblock %}

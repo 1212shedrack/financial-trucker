@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+{% block title %}{% trans "Net Worth Tracking" %}{% endblock %}
+{% block page_title %}{% trans "Net Worth Tracking" %}{% endblock %}
+
+{% block content %}
+<!-- Summary Top Banner -->
+<div class="card mb-4 text-white" style="background: linear-gradient(135deg, #198754, #0d6efd);">
+  <div class="card-body p-4 text-center">
+    <div class="small text-uppercase opacity-75 fw-semibold mb-1">{% trans "Your Total Net Worth" %}</div>
+    <div class="display-5 fw-bold mb-2">TSh {{ data.net_worth|floatformat:0 }}</div>
+    <div class="d-flex justify-content-center gap-4 mt-3 pt-3 border-top border-white-50">
+      <div>
+        <span class="small opacity-75">{% trans "Total Assets" %}: </span>
+        <strong class="fs-6">TSh {{ data.total_assets|floatformat:0 }}</strong>
+      </div>
+      <div>
+        <span class="small opacity-75">{% trans "Total Liabilities" %}: </span>
+        <strong class="fs-6">TSh {{ data.total_liabilities|floatformat:0 }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Assets Card -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-wallet2 me-2"></i>{% trans "Assets Breakdown" %}</h6>
+        <span class="badge bg-white text-success fw-bold">TSh {{ data.total_assets|floatformat:0 }}</span>
+      </div>
+      <div class="card-body">
+        <div class="list-group list-group-flush">
+          {% for asset in data.asset_breakdown %}
+          <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div>
+              <div class="fw-semibold">{{ asset.name }}</div>
+              <small class="text-muted">{{ asset.type }}</small>
+            </div>
+            <div class="fw-bold text-success">TSh {{ asset.amount|floatformat:0 }}</div>
+          </div>
+          {% empty %}
+          <div class="text-muted text-center py-3">{% trans "No assets recorded yet. Add wallets/accounts to track assets." %}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liabilities Card -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-bank me-2"></i>{% trans "Liabilities (Debts Owed)" %}</h6>
+        <span class="badge bg-white text-danger fw-bold">TSh {{ data.total_liabilities|floatformat:0 }}</span>
+      </div>
+      <div class="card-body">
+        <div class="list-group list-group-flush">
+          {% for liability in data.liability_breakdown %}
+          <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div>
+              <div class="fw-semibold">{{ liability.name }}</div>
+              {% if liability.due_date %}<small class="text-danger">{% trans "Due" %}: {{ liability.due_date }}</small>{% endif %}
+            </div>
+            <div class="fw-bold text-danger">TSh {{ liability.amount|floatformat:0 }}</div>
+          </div>
+          {% empty %}
+          <div class="text-muted text-center py-4">
+            <i class="bi bi-check-circle text-success fs-3 d-block mb-1"></i>
+            {% trans "Zero liabilities! You owe no outstanding loans." %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

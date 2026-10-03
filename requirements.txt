@@ -1,0 +1,47 @@
+# Core Django
+Django==5.0.6
+djangorestframework==3.15.2
+
+# Authentication & Security
+django-ratelimit==4.1.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Environment variables
+python-decouple==3.8
+
+# Analytics
+pandas==2.2.2
+numpy==1.26.4
+
+# Image handling
+Pillow==10.3.0
+
+# Excel export
+openpyxl==3.1.4
+xlsxwriter==3.2.0
+
+# PDF export
+reportlab==4.2.2
+
+# CSV utilities
+chardet==5.2.0
+
+# Production server
+gunicorn==22.0.0
+
+# Timezone
+pytz==2024.1
+
+# Date utilities
+python-dateutil==2.9.0.post0
+
+# Django extensions (useful for development)
+django-extensions==3.2.3
+
+# WhiteNoise for static files
+whitenoise==6.7.0
+
+# Caching (optional redis)
+django-redis==5.4.0

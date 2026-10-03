@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "User Profile" %}{% endblock %}
+{% block page_title %}{% trans "Profile Settings" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-4 mb-4">
+    <div class="card shadow-sm p-4 text-center">
+      <div class="position-relative d-inline-block mx-auto mb-3">
+        {% if user.profile.profile_photo %}
+          <img src="{{ user.profile.profile_photo.url }}" alt="Profile" class="rounded-circle shadow-sm" style="width: 110px; height: 110px; object-fit: cover;">
+        {% else %}
+          <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary border mx-auto" style="width: 110px; height: 110px; font-size: 48px;">
+            <i class="bi bi-person"></i>
+          </div>
+        {% endif %}
+      </div>
+      <h5 class="fw-bold mb-1">{{ user.profile.display_name }}</h5>
+      <p class="text-muted small mb-3">@{{ user.username }} &bull; {{ user.email }}</p>
+      <div class="badge bg-success bg-opacity-10 text-success py-2 px-3 rounded-pill mb-3">
+        {% trans "Currency" %}: {{ user.profile.preferred_currency }} ({{ user.profile.currency_symbol }})
+      </div>
+      <hr>
+      <div class="text-start small">
+        <div class="mb-2"><strong class="text-muted">{% trans "Timezone" %}:</strong> {{ user.profile.timezone }}</div>
+        <div class="mb-2"><strong class="text-muted">{% trans "Phone" %}:</strong> {{ user.profile.phone_number|default:_("Not set") }}</div>
+        <div class="mb-2"><strong class="text-muted">{% trans "Joined" %}:</strong> {{ user.date_joined|date:"M d, Y" }}</div>
+      </div>
+      <div class="d-grid mt-3">
+        <a href="{% url 'change_password' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-key me-1"></i> {% trans "Change Password" %}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <h5 class="fw-bold mb-4">{% trans "Edit Profile" %}</h5>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Full Name" %}</label>
+            {{ form.full_name }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Phone Number" %}</label>
+            {{ form.phone_number }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Preferred Currency" %}</label>
+            {{ form.preferred_currency }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Timezone" %}</label>
+            {{ form.timezone }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Monthly Income Target (TZS)" %}</label>
+            {{ form.monthly_income_target }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Monthly Savings Target (TZS)" %}</label>
+            {{ form.monthly_savings_target }}
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">{% trans "Profile Photo" %}</label>
+            {{ form.profile_photo }}
+          </div>
+          <div class="col-12 text-end mt-4">
+            <button type="submit" class="btn btn-success px-4 fw-semibold">{% trans "Save Changes" %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

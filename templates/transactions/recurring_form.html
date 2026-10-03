@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ action }} {% trans "Recurring Transaction" %}{% endblock %}
+{% block page_title %}{{ action }} {% trans "Recurring Schedule" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">{{ action }} {% trans "Recurring Schedule" %}</h5>
+        <a href="{% url 'recurring_list' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i>{% trans "Back" %}
+        </a>
+      </div>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="row g-3">
+
+          <!-- Title -->
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Title / Description" %} </label>
+            {{ form.title }}
+            {% if form.title.errors %}
+              <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Amount -->
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Amount (TZS)" %} </label>
+            <div class="input-group">
+              <span class="input-group-text">TSh</span>
+              {{ form.amount }}
+            </div>
+            {% if form.amount.errors %}
+              <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Transaction Type -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Transaction Type" %} *</label>
+            {{ form.transaction_type }}
+            {% if form.transaction_type.errors %}
+              <div class="text-danger small mt-1">{{ form.transaction_type.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Frequency -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Frequency" %} *</label>
+            {{ form.frequency }}
+            {% if form.frequency.errors %}
+              <div class="text-danger small mt-1">{{ form.frequency.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Category" %}</label>
+            {{ form.category }}
+            {% if form.category.errors %}
+              <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Payment Method -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Payment Method" %}</label>
+            {{ form.payment_method }}
+            {% if form.payment_method.errors %}
+              <div class="text-danger small mt-1">{{ form.payment_method.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Start Date -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Start Date" %} *</label>
+            {{ form.start_date }}
+            {% if form.start_date.errors %}
+              <div class="text-danger small mt-1">{{ form.start_date.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Next Due Date -->
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">{% trans "Next Due Date" %} *</label>
+            {{ form.next_due_date }}
+            {% if form.next_due_date.errors %}
+              <div class="text-danger small mt-1">{{ form.next_due_date.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- End Date -->
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "End Date" %} ({% trans "Optional" %})</label>
+            {{ form.end_date }}
+            {% if form.end_date.errors %}
+              <div class="text-danger small mt-1">{{ form.end_date.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Notes -->
+          <div class="col-12">
+            <label class="form-label small fw-semibold">{% trans "Notes" %}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+              <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="col-12 text-end mt-4">
+            <a href="{% url 'recurring_list' %}" class="btn btn-outline-secondary me-2">
+              {% trans "Cancel" %}
+            </a>
+            <button type="submit" class="btn btn-success fw-semibold px-4">
+              <i class="bi bi-check-circle me-1"></i>{% trans "Save Schedule" %}
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

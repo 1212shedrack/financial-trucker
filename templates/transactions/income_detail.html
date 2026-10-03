@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load finance_tags %}
+
+{% block title %}Income Details{% endblock %}
+{% block page_title %}Income Details{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">Income Record #{{ object.pk }}</h5>
+        <div class="btn-group btn-group-sm">
+          <a href="{% url 'income_edit' object.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i> Edit</a>
+          <a href="{% url 'income_delete' object.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i> Delete</a>
+          <a href="{% url 'income_list' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-1"></i> All</a>
+        </div>
+      </div>
+
+      <div class="p-3 bg-light rounded-3 text-center mb-4">
+        <div class="text-muted small text-uppercase">Amount Received</div>
+        <div class="display-6 fw-bold text-success">{{ object.amount|currency }}</div>
+        <div class="text-muted small mt-1">{{ object.date|date:"l, F d, Y" }}</div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-sm-6"><strong class="text-muted small d-block">Source</strong><span>{{ object.source }}</span></div>
+        <div class="col-sm-6">
+          <strong class="text-muted small d-block">Category</strong>
+          {% if object.category %}
+            <span class="badge bg-light text-dark border"><i class="bi {{ object.category.icon }} me-1" style="color: {{ object.category.color }};"></i>{{ object.category.name }}</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+        <div class="col-sm-6"><strong class="text-muted small d-block">Payment Method</strong><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ object.get_payment_method_display }}</span></div>
+        <div class="col-sm-6"><strong class="text-muted small d-block">Recorded On</strong><span class="text-muted">{{ object.created_at|date:"Y-m-d H:i" }}</span></div>
+        {% if object.description %}
+          <div class="col-12"><strong class="text-muted small d-block">Description</strong><p class="mb-0">{{ object.description }}</p></div>
+        {% endif %}
+        {% if object.notes %}
+          <div class="col-12"><strong class="text-muted small d-block">Notes</strong><p class="mb-0 text-muted">{{ object.notes }}</p></div>
+        {% endif %}
+        {% if object.attachment %}
+          <div class="col-12 mt-3">
+            <strong class="text-muted small d-block mb-2">Attachment</strong>
+            <a href="{{ object.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-arrow-down me-1"></i> View / Download Attachment</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

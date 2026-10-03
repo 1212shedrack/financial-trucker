@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model AuthUser {
+  id             BigInt          @id @default(autoincrement())
+  password       String
+  lastLogin      DateTime?       @map("last_login")
+  isSuperuser    Boolean         @map("is_superuser")
+  username       String          @unique @db.VarChar(150)
+  firstName      String?         @map("first_name") @db.VarChar(150)
+  lastName       String?         @map("last_name") @db.VarChar(150)
+  email          String?        @db.VarChar(254)
+  isStaff        Boolean         @map("is_staff")
+  isActive       Boolean         @map("is_active")
+  dateJoined     DateTime        @map("date_joined")
+
+  profile        UserProfile?
+  accounts       Account[]
+  transfers      Transfer[]
+  categories     Category[]
+  incomes        Income[]
+  expenses       Expense[]
+  budgets        Budget[]
+  goals          FinancialGoal[]
+  debts          Debt[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  recurringTransactions RecurringTransaction[]
+
+  @@map("auth_user")
+}
+
+model UserProfile {
+  id                   BigInt      @id @default(autoincrement())
+  userId               BigInt      @unique @map("user_id")
+  fullName             String      @default("") @map("full_name") @db.VarChar(200)
+  phoneNumber          String      @default("") @map("phone_number") @db.VarChar(20)
+  profilePhoto         String?     @map("profile_photo")
+  preferredCurrency    String      @default("TZS") @map("preferred_currency") @db.VarChar(3)
+  timezone             String      @default("Africa/Dar_es_Salaam") @db.VarChar(50)
+  monthlyIncomeTarget  Decimal     @default(0) @map("monthly_income_target") @db.Decimal(15, 2)
+  monthlySavingsTarget Decimal     @default(0) @map("monthly_savings_target") @db.Decimal(15, 2)
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+  user                 AuthUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts_userprofile")
+}
+
+model Account {
+  id             BigInt      @id @default(autoincrement())
+  userId         BigInt      @map("user_id")
+  name           String      @db.VarChar(150)
+  accountType    String      @default("cash") @map("account_type") @db.VarChar(20)
+  accountNumber  String      @default("") @map("account_number") @db.VarChar(100)
+  openingBalance Decimal     @default(0) @map("opening_balance") @db.Decimal(15, 2)
+  color          String      @default("#0d6efd") @db.VarChar(7)
+  isActive       Boolean     @default(true) @map("is_active")
+  notes          String      @default("")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  user           AuthUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomes        Income[]
+  expenses       Expense[]
+  outgoingTransfers Transfer[] @relation("TransferFromAccount")
+  incomingTransfers Transfer[] @relation("TransferToAccount")
+
+  @@unique([userId, name])
+  @@map("accounts_wallet_account")
+}
+
+model Transfer {
+  id            BigInt    @id @default(autoincrement())
+  userId        BigInt    @map("user_id")
+  fromAccountId BigInt    @map("from_account_id")
+  toAccountId   BigInt    @map("to_account_id")
+  amount        Decimal   @db.Decimal(15, 2)
+  date          DateTime  @db.Date
+  notes         String    @default("")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user          AuthUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAccount   Account   @relation("TransferFromAccount", fields: [fromAccountId], references: [id], onDelete: Cascade)
+  toAccount     Account   @relation("TransferToAccount", fields: [toAccountId], references: [id], onDelete: Cascade)
+
+  @@map("accounts_wallet_transfer")
+}
+
+model Category {
+  id            BigInt      @id @default(autoincrement())
+  userId        BigInt?     @map("user_id")
+  name          String      @db.VarChar(100)
+  categoryType  String      @default("both") @map("category_type") @db.VarChar(10)
+  icon          String      @default("bi-tag") @db.VarChar(50)
+  color         String      @default("#6c757d") @db.VarChar(7)
+  isDefault     Boolean     @default(false) @map("is_default")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  user          AuthUser?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomes       Income[]
+  expenses      Expense[]
+  budgets       Budget[]
+  recurringTransactions RecurringTransaction[]
+
+  @@index([name])
+  @@map("transactions_category")
+}
+
+model Income {
+  id             BigInt     @id @default(autoincrement())
+  userId         BigInt     @map("user_id")
+  amount         Decimal    @db.Decimal(15, 2)
+  source         String     @db.VarChar(200)
+  categoryId     BigInt?    @map("category_id")
+  accountId      BigInt?    @map("account_id")
+  date           DateTime   @db.Date
+  paymentMethod  String     @default("cash") @map("payment_method") @db.VarChar(20)
+  description    String     @default("")
+  notes          String     @default("")
+  attachment     String?    @map("attachment")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  user           AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  account        Account?   @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, categoryId])
+  @@map("transactions_income")
+}
+
+model Expense {
+  id             BigInt     @id @default(autoincrement())
+  userId         BigInt     @map("user_id")
+  amount         Decimal    @db.Decimal(15, 2)
+  description    String     @db.VarChar(300)
+  categoryId     BigInt?    @map("category_id")
+  accountId      BigInt?    @map("account_id")
+  date           DateTime   @db.Date
+  time           DateTime?  @db.Time
+  paymentMethod  String     @default("cash") @map("payment_method") @db.VarChar(20)
+  notes          String     @default("")
+  receipt        String?    @map("receipt")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  user           AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  account        Account?   @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, categoryId])
+  @@map("transactions_expense")
+}
+
+model RecurringTransaction {
+  id               BigInt     @id @default(autoincrement())
+  userId           BigInt     @map("user_id")
+  title            String     @db.VarChar(200)
+  amount           Decimal    @db.Decimal(15, 2)
+  transactionType  String     @map("transaction_type") @db.VarChar(10)
+  categoryId       BigInt?    @map("category_id")
+  paymentMethod    String     @default("cash") @map("payment_method") @db.VarChar(20)
+  frequency        String     @db.VarChar(10)
+  startDate        DateTime   @map("start_date") @db.Date
+  nextDueDate      DateTime   @map("next_due_date") @db.Date
+  endDate          DateTime?  @map("end_date") @db.Date
+  active           Boolean    @default(true)
+  notes            String     @default("")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  user             AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, active, nextDueDate])
+  @@map("transactions_recurringtransaction")
+}
+
+model Budget {
+  id         BigInt     @id @default(autoincrement())
+  userId     BigInt     @map("user_id")
+  categoryId BigInt     @map("category_id")
+  amount     Decimal    @db.Decimal(15, 2)
+  period     String     @db.VarChar(10)
+  startDate  DateTime   @map("start_date") @db.Date
+  endDate    DateTime?  @map("end_date") @db.Date
+  notes      String     @default("")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  user       AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([userId, period])
+  @@map("budgets_budget")
+}
+
+model FinancialGoal {
+  id             BigInt     @id @default(autoincrement())
+  userId         BigInt     @map("user_id")
+  name           String     @db.VarChar(200)
+  description    String     @default("")
+  targetAmount   Decimal    @map("target_amount") @db.Decimal(15, 2)
+  currentAmount  Decimal    @default(0) @map("current_amount") @db.Decimal(15, 2)
+  targetDate     DateTime?  @map("target_date") @db.Date
+  category       String     @default("") @db.VarChar(100)
+  isCompleted    Boolean    @default(false) @map("is_completed")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  user           AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions  GoalContribution[]
+
+  @@map("goals_financialgoal")
+}
+
+model GoalContribution {
+  id         BigInt     @id @default(autoincrement())
+  goalId     BigInt     @map("goal_id")
+  amount     Decimal    @db.Decimal(15, 2)
+  date       DateTime   @db.Date
+  notes      String     @default("")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  goal       FinancialGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("goals_goalcontribution")
+}
+
+model Debt {
+  id               BigInt     @id @default(autoincrement())
+  userId           BigInt     @map("user_id")
+  debtType         String     @default("loan") @map("debt_type") @db.VarChar(20)
+  name             String     @db.VarChar(200)
+  description      String     @default("")
+  principalAmount  Decimal    @map("principal_amount") @db.Decimal(15, 2)
+  interestRate     Decimal    @default(0) @map("interest_rate") @db.Decimal(5, 2)
+  startDate        DateTime   @map("start_date") @db.Date
+  dueDate          DateTime?  @map("due_date") @db.Date
+  status           String     @default("active") @db.VarChar(20)
+  notes            String     @default("")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  user             AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repayments       DebtRepayment[]
+
+  @@map("debts_debt")
+}
+
+model DebtRepayment {
+  id             BigInt     @id @default(autoincrement())
+  debtId         BigInt     @map("debt_id")
+  amount         Decimal    @db.Decimal(15, 2)
+  date           DateTime   @db.Date
+  paymentMethod  String     @default("cash") @map("payment_method") @db.VarChar(20)
+  notes          String     @default("")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  debt           Debt       @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@map("debts_debtrepayment")
+}
+
+model Notification {
+  id               BigInt     @id @default(autoincrement())
+  userId           BigInt     @map("user_id")
+  notificationType String     @default("info") @map("notification_type") @db.VarChar(30)
+  title            String     @db.VarChar(200)
+  message          String
+  isRead           Boolean    @default(false) @map("is_read")
+  createdAt        DateTime   @default(now()) @map("created_at")
+
+  user             AuthUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications_notification")
+}
+
+model AuditLog {
+  id          BigInt     @id @default(autoincrement())
+  userId      BigInt?    @map("user_id")
+  action      String     @db.VarChar(20)
+  timestamp   DateTime   @default(now())
+  ipAddress   String?    @map("ip_address")
+  description String    @default("")
+
+  user        AuthUser?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, timestamp])
+  @@index([action])
+  @@map("core_auditlog")
+}

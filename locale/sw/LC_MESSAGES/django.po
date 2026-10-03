@@ -1,0 +1,1506 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PFAMS 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-26 14:00+0300\n"
+"PO-Revision-Date: 2026-08-26 18:50+0300\n"
+"Last-Translator: PFAMS Team\n"
+"Language-Team: Swahili\n"
+"Language: sw\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Model Choices: Debt Types
+msgid "Loan (I Owe)"
+msgstr "Mkopo (Ninayodaiwa)"
+
+msgid "Receivable (Owed to Me)"
+msgstr "Deni (Wanaonidai)"
+
+# Model Choices: Debt Status
+msgid "Active"
+msgstr "Inaendelea"
+
+msgid "Paid Off"
+msgstr "Imelipwa Kamili"
+
+msgid "Overdue"
+msgstr "Imechelewa"
+
+msgid "Partially Paid"
+msgstr "Imelipwa Sehemu"
+
+# Model Choices: Payment Methods
+msgid "Cash"
+msgstr "Pesa Taslimu"
+
+msgid "Bank Transfer"
+msgstr "Uhamisho wa Benki"
+
+msgid "Card"
+msgstr "Kadi"
+
+msgid "Other"
+msgstr "Nyingine"
+
+# Model Choices: Account Types
+msgid "Bank Account"
+msgstr "Akaunti ya Benki"
+
+msgid "Savings Account"
+msgstr "Akaunti ya Akiba"
+
+# Model Choices: Budget Periods
+msgid "Weekly"
+msgstr "Kila Wiki"
+
+msgid "Monthly"
+msgstr "Kila Mwezi"
+
+msgid "Yearly"
+msgstr "Kila Mwaka"
+
+msgid "Custom"
+msgstr "Kibinafsi"
+
+# Model Choices: Transaction/Frequency
+msgid "Daily"
+msgstr "Kila Siku"
+
+msgid "Expense"
+msgstr "Matumizi"
+
+msgid "Income"
+msgstr "Mapato"
+
+msgid "Both"
+msgstr "Zote"
+
+# Model Choices: Category Types
+msgid "Category Name"
+msgstr "Jina la Aina"
+
+msgid "Category Type"
+msgstr "Aina ya Kategoria"
+
+msgid "Bootstrap Icon class name"
+msgstr "Jina la darasa la ikoni ya Bootstrap"
+
+msgid "Hex color code"
+msgstr "Nambari ya rangi ya Hex"
+
+# Model: Account Help Text
+msgid "e.g. \"Azania Bank\", \"My M-Pesa\""
+msgstr "mfano \"Azania Bank\", \"M-Pesa Yangu\""
+
+msgid "Last 4 digits or identifier"
+msgstr "Tarakimu 4 za mwisho au kitambulisho"
+
+msgid "Hex color for UI display"
+msgstr "Nambari ya rangi ya Hex kwa muonekano"
+
+msgid "Wallet/account this income was received into"
+msgstr "Pochi/akaunti ambayo mapato yalipokelewa"
+
+msgid "Wallet/account this expense was paid from"
+msgstr "Pochi/akaunti ambayo matumizi yalilipwa"
+
+msgid "Original loan or debt amount"
+msgstr "Kiasi cha awali cha mkopo au deni"
+
+msgid "Annual interest rate as percentage (e.g. 12.5 for 12.5%)"
+msgstr "Kiwango cha riba cha kila mwaka kwa asilimia (mfano 12.5 kwa 12.5%)"
+
+msgid "Person or institution name"
+msgstr "Jina la mtu au taasisi"
+
+# Model: Debt Form Labels
+msgid "Debt Type"
+msgstr "Aina ya Deni"
+
+msgid "Principal Amount (TZS)"
+msgstr "Kiasi cha Msingi (TZS)"
+
+msgid "Interest Rate (% p.a.)"
+msgstr "Kiwango cha Riba (% kwa Mwaka)"
+
+# Model: Account Form Labels
+msgid "Account Name"
+msgstr "Jina la Akaunti"
+
+msgid "Account Type"
+msgstr "Aina ya Akaunti"
+
+msgid "Account Number"
+msgstr "Nambari ya Akaunti"
+
+msgid "Opening Balance (TZS)"
+msgstr "Salio la Awali (TZS)"
+
+msgid "From Account"
+msgstr "Kutoka Akaunti"
+
+msgid "To Account"
+msgstr "Kwenda Akaunti"
+
+msgid "Cannot transfer to and from the same account."
+msgstr "Haiwezekani kuhamisha pesa kwenda na kutoka akaunti moja."
+
+msgid "Transfer amount must be greater than zero."
+msgstr "Kiasi cha uhamishaji lazima kiwe zaidi ya sifuri."
+
+# Model: Recurring Form Labels
+msgid "Transaction Type"
+msgstr "Aina ya Muamala"
+
+msgid "Next Due Date"
+msgstr "Tarehe Inayofuata ya Malipo"
+
+msgid "End Date"
+msgstr "Tarehe ya Mwisho"
+
+msgid "e.g. Monthly Rent"
+msgstr "mfano Kodi ya Kila Mwezi"
+
+# Model: Income Form Labels & Placeholders
+msgid "Source / Payer"
+msgstr "Chanzo / Mlipaji"
+
+msgid "Attachment / Receipt"
+msgstr "Kiambatisho / Resiti"
+
+msgid "e.g. Monthly Salary"
+msgstr "mfano Mshahara wa Kila Mwezi"
+
+msgid "Brief description"
+msgstr "Maelezo mafupi"
+
+msgid "Additional notes"
+msgstr "Vidokezo vya ziada"
+
+# Model: Expense Form Labels & Placeholders
+msgid "Receipt Upload"
+msgstr "Pakia Resiti"
+
+msgid "e.g. Grocery shopping"
+msgstr "mfano Manunuzi ya Mboga"
+
+# Model: Goals Form Labels
+msgid "Goal Name"
+msgstr "Jina la Lengo"
+
+msgid "Description / Purpose"
+msgstr "Maelezo / Madhumuni"
+
+msgid "Target Amount (TZS)"
+msgstr "Kiasi Lengo (TZS)"
+
+msgid "Target Date"
+msgstr "Tarehe ya Lengo"
+
+msgid "Currently Saved"
+msgstr "Akiba Iliyowekwa"
+
+msgid "Completed"
+msgstr "Imekamilika"
+
+msgid "e.g. Emergency Fund"
+msgstr "mfano Akiba ya Dharura"
+
+msgid "e.g. Education"
+msgstr "mfano Elimu"
+
+msgid "Optional notes"
+msgstr "Vidokezo vya hiari"
+
+msgid "Contribution amount must be greater than zero."
+msgstr "Kiasi cha akiba lazima kiwe zaidi ya sifuri."
+
+msgid "Target amount must be greater than zero."
+msgstr "Kiasi lengo lazima kiwe zaidi ya sifuri."
+
+# Model: Budget Form Labels
+msgid "Budget Limit (TZS)"
+msgstr "Kikomo cha Bajeti (TZS)"
+
+msgid "End Date (Custom)"
+msgstr "Tarehe ya Mwisho (Kibinafsi)"
+
+msgid "Budget amount must be greater than zero."
+msgstr "Kiasi cha bajeti lazima kiwe zaidi ya sifuri."
+
+# Validation Errors
+msgid "Amount must be greater than zero."
+msgstr "Kiasi lazima kiwe zaidi ya sifuri."
+
+msgid "You already have a category with this name."
+msgstr "Tayari una aina iliyo na jina hili."
+
+msgid "New passwords do not match."
+msgstr "Nenosiri jipya hazilingani."
+
+msgid "Password must be at least 8 characters."
+msgstr "Nenosiri lazima liwe na angalau herufi 8."
+
+# Filter Form
+msgid "All"
+msgstr "Zote"
+
+msgid "All Categories"
+msgstr "Aina Zote"
+
+msgid "All Methods"
+msgstr "Njia Zote"
+
+msgid "Date (newest)"
+msgstr "Tarehe (mpya zaidi)"
+
+msgid "Date (oldest)"
+msgstr "Tarehe (kongwe zaidi)"
+
+msgid "Amount (highest)"
+msgstr "Kiasi (kikubwa zaidi)"
+
+msgid "Amount (lowest)"
+msgstr "Kiasi (kidogo zaidi)"
+
+msgid "Min"
+msgstr "Chini"
+
+msgid "Search..."
+msgstr "Tafuta..."
+
+msgid "From Date"
+msgstr "Tangu Tarehe"
+
+msgid "To Date"
+msgstr "Hadi Tarehe"
+
+# Topbar & Navigation
+msgid "Dashboard"
+msgstr "Deshibodi"
+
+msgid "Online"
+msgstr "Upo Mtandaoni"
+
+msgid "Offline"
+msgstr "Nje ya Mtandao"
+
+msgid "pending"
+msgstr "zinasubiri"
+
+msgid "Toggle dark mode"
+msgstr "Badili hali ya giza/mwanga"
+
+msgid "Install PFAMS for offline access"
+msgstr "Weka PFAMS kwenye kifaa chako kwa matumizi ya bila mtandao"
+
+msgid "Install"
+msgstr "Weka App"
+
+msgid "Dismiss"
+msgstr "Ondoa"
+
+msgid "Transactions"
+msgstr "Miamala"
+
+msgid "Expenses"
+msgstr "Matumizi"
+
+msgid "Budgets"
+msgstr "Bajeti"
+
+msgid "Goals"
+msgstr "Malengo"
+
+msgid "Recurring"
+msgstr "Miamala ya Kila Mara"
+
+msgid "Analytics"
+msgstr "Uchambuzi"
+
+msgid "Reports"
+msgstr "Ripoti"
+
+msgid "Categories"
+msgstr "Aina / Makundi"
+
+msgid "Wallets & Accounts"
+msgstr "Pochi na Akaunti"
+
+msgid "Debts & Loans"
+msgstr "Madeni na Mikopo"
+
+msgid "Net Worth"
+msgstr "Thamani Halisi"
+
+msgid "Health Index"
+msgstr "Kiwango cha Afya ya Fedha"
+
+msgid "Calendar"
+msgstr "Kalenda"
+
+msgid "Backup & Restore"
+msgstr "Hifadhi na Rejesha Data"
+
+# Language Switcher
+msgid "English"
+msgstr "Kiingereza"
+
+msgid "Swahili"
+msgstr "Kiswahili"
+
+# Auth Pages & Profile
+msgid "Welcome Back"
+msgstr "Karibu Tena"
+
+msgid "Sign in to your PFAMS account"
+msgstr "Ingia kwenye akaunti yako ya PFAMS"
+
+msgid "Username"
+msgstr "Jina la Mtumiaji"
+
+msgid "Password"
+msgstr "Nenosiri"
+
+msgid "Forgot password?"
+msgstr "Umesahau nenosiri?"
+
+msgid "Remember me"
+msgstr "Nikumbuke"
+
+msgid "Sign In"
+msgstr "Ingia"
+
+msgid "Create Account"
+msgstr "Fungua Akaunti"
+
+msgid "Don't have an account?"
+msgstr "Huna akaunti?"
+
+msgid "Already have an account?"
+msgstr "Unayo akaunti tayari?"
+
+msgid "Logout"
+msgstr "Ondoka"
+
+msgid "Profile"
+msgstr "Profaili"
+
+msgid "User Profile"
+msgstr "Profaili ya Mtumiaji"
+
+msgid "Profile Settings"
+msgstr "Mipangilio ya Profaili"
+
+msgid "Currency"
+msgstr "Sarafu"
+
+msgid "Timezone"
+msgstr "Eneo la Muda"
+
+msgid "Phone"
+msgstr "Simu"
+
+msgid "Joined"
+msgstr "Alijiunga"
+
+msgid "Not set"
+msgstr "Haijawekwa"
+
+msgid "Edit Profile"
+msgstr "Hariri Profaili"
+
+msgid "Full Name"
+msgstr "Jina Kamili"
+
+msgid "Phone Number"
+msgstr "Namba ya Simu"
+
+msgid "Preferred Currency"
+msgstr "Sarafu Inayopendelewa"
+
+msgid "Monthly Income Target (TZS)"
+msgstr "Lengo la Mapato kwa Mwezi (TZS)"
+
+msgid "Monthly Savings Target (TZS)"
+msgstr "Lengo la Akiba kwa Mwezi (TZS)"
+
+msgid "Profile Photo"
+msgstr "Picha ya Profaili"
+
+msgid "Save Changes"
+msgstr "Hifadhi Mabadiliko"
+
+msgid "Change Password"
+msgstr "Badili Nenosiri"
+
+msgid "Security Settings"
+msgstr "Mipangilio ya Usalama"
+
+msgid "Ensure your account uses a strong password."
+msgstr "Hakikisha akaunti yako inatumia nenosiri imara."
+
+msgid "Current Password"
+msgstr "Nenosiri la Sasa"
+
+msgid "New Password"
+msgstr "Nenosiri Jipya"
+
+msgid "Confirm New Password"
+msgstr "Thibitisha Nenosiri Jipya"
+
+msgid "Show/Hide password"
+msgstr "Onyesha/Ficha nenosiri"
+
+msgid "Update Password"
+msgstr "Sasisha Nenosiri"
+
+msgid "Register"
+msgstr "Jiandikishe"
+
+msgid "Create an Account"
+msgstr "Fungua Akaunti"
+
+msgid "Start tracking your personal finances in TZS"
+msgstr "Anza kufuatilia fedha zako za kibinafsi kwa TZS"
+
+msgid "Email Address"
+msgstr "Anwani ya Barua Pepe"
+
+msgid "Confirm Password"
+msgstr "Thibitisha Nenosiri"
+
+msgid "Email address"
+msgstr "Anwani ya barua pepe"
+
+msgid "Full name (optional)"
+msgstr "Jina kamili (hiari)"
+
+msgid "Confirm password"
+msgstr "Thibitisha nenosiri"
+
+# Dashboard
+msgid "Income Management"
+msgstr "Usimamizi wa Mapato"
+
+msgid "Expense Management"
+msgstr "Usimamizi wa Matumizi"
+
+msgid "Income Records"
+msgstr "Rekodi za Mapato"
+
+msgid "Expense Records"
+msgstr "Rekodi za Matumizi"
+
+msgid "Total Tracked"
+msgstr "Jumla Iliyofuatiliwa"
+
+msgid "Add Income"
+msgstr "Ongeza Mapato"
+
+msgid "Add Expense"
+msgstr "Ongeza Matumizi"
+
+msgid "Income Record"
+msgstr "Rekodi ya Mapato"
+
+msgid "Expense Record"
+msgstr "Rekodi ya Matumizi"
+
+msgid "Back to List"
+msgstr "Rudi kwenye Orodha"
+
+msgid "Amount (TZS)"
+msgstr "Kiasi (TZS)"
+
+msgid "Save Income"
+msgstr "Hifadhi Mapato"
+
+msgid "Save Expense"
+msgstr "Hifadhi Matumizi"
+
+msgid "Current file"
+msgstr "Faili la sasa"
+
+msgid "Net Savings"
+msgstr "Akiba Halisi"
+
+msgid "Savings rate"
+msgstr "Kiwango cha Akiba"
+
+msgid "Daily Avg Spend"
+msgstr "Wastani wa Matumizi kwa Siku"
+
+msgid "Avg per day"
+msgstr "Wastani kwa siku"
+
+msgid "Monthly Trends"
+msgstr "Mwenendo wa Kila Mwezi"
+
+msgid "Expense Breakdown"
+msgstr "Mgawanyo wa Matumizi"
+
+msgid "No expense data yet"
+msgstr "Bado hakuna data ya matumizi"
+
+msgid "Insights"
+msgstr "Maarifa"
+
+msgid "Add transactions to get personalized insights."
+msgstr "Ongeza miamala ili upate maarifa ya kibinafsi."
+
+msgid "Budget Status"
+msgstr "Hali ya Bajeti"
+
+msgid "Manage"
+msgstr "Simamia"
+
+msgid "No budgets set."
+msgstr "Hakuna bajeti iliyowekwa."
+
+msgid "Create one"
+msgstr "Unda moja"
+
+msgid "Recent Transactions"
+msgstr "Miamala ya Hivi Karibuni"
+
+msgid "View All"
+msgstr "Ona Yote"
+
+msgid "Savings Goals"
+msgstr "Malengo ya Akiba"
+
+msgid "No goals yet."
+msgstr "Bado hakuna malengo."
+
+msgid "No transactions yet."
+msgstr "Bado hakuna miamala."
+
+msgid "Add income"
+msgstr "Ongeza mapato"
+
+msgid "add expense"
+msgstr "ongeza matumizi"
+
+msgid "or"
+msgstr "au"
+
+msgid "record"
+msgstr "rekodi"
+
+# Recurring Transactions
+msgid "Recurring Transactions"
+msgstr "Miamala ya Kila Mara"
+
+msgid "Scheduled & Recurring Transactions"
+msgstr "Miamala Iliyoratibiwa na ya Kila Mara"
+
+msgid "Automate and track repeating salaries, subscriptions, rent, and bills"
+msgstr "Weka kiotomatiki na ufuatilie mishahara, ada, kodi, na bili"
+
+msgid "Add Recurring"
+msgstr "Ongeza Miamala ya Kila Mara"
+
+msgid "Title"
+msgstr "Kichwa / Jina"
+
+msgid "Frequency"
+msgstr "Mzunguko"
+
+msgid "Ends"
+msgstr "Inaisha"
+
+msgid "Paused"
+msgstr "Imesimamishwa"
+
+msgid "Toggle active"
+msgstr "Badili hali ya kufanya kazi"
+
+msgid "Delete this recurring schedule?"
+msgstr "Futa ratiba hii ya kila mara?"
+
+msgid "No recurring schedules created."
+msgstr "Bado hujaunda ratiba za kila mara."
+
+msgid "Create your first schedule"
+msgstr "Unda ratiba yako ya kwanza"
+
+# Transactions List
+msgid "All Transactions"
+msgstr "Miamala Yote"
+
+msgid "Transaction History"
+msgstr "Historia ya Miamala"
+
+msgid "Combined Transaction History"
+msgstr "Historia Kamili ya Miamala"
+
+msgid "View all income and expenses in chronological order"
+msgstr "Tazama mapato na matumizi yote kwa mfuatano wa tarehe"
+
+msgid "Search keywords..."
+msgstr "Tafuta kwa maneno..."
+
+msgid "Type"
+msgstr "Aina"
+
+msgid "All Types"
+msgstr "Aina Zote"
+
+msgid "Description / Source"
+msgstr "Maelezo / Chanzo"
+
+# Table Headers / Common
+msgid "Date"
+msgstr "Tarehe"
+
+msgid "Time"
+msgstr "Muda"
+
+msgid "Source"
+msgstr "Chanzo"
+
+msgid "Description"
+msgstr "Maelezo"
+
+msgid "Category"
+msgstr "Aina"
+
+msgid "Payment Method"
+msgstr "Njia ya Malipo"
+
+msgid "Amount"
+msgstr "Kiasi"
+
+msgid "Actions"
+msgstr "Vitendo"
+
+msgid "Payment"
+msgstr "Malipo"
+
+msgid "Search"
+msgstr "Tafuta"
+
+msgid "Notes"
+msgstr "Vidokezo / Maelezo"
+
+msgid "Source or description..."
+msgstr "Chanzo au maelezo..."
+
+msgid "Description or notes..."
+msgstr "Maelezo au vidokezo..."
+
+# Health Index & Forecast
+msgid "Financial Health Score & Forecasting"
+msgstr "Afya ya Fedha na Utabiri"
+
+msgid "Financial Health & Forecast"
+msgstr "Afya ya Fedha na Utabiri"
+
+msgid "Financial Health Index"
+msgstr "Kiwango cha Afya ya Fedha"
+
+msgid "out of 100"
+msgstr "kati ya 100"
+
+msgid "Grade"
+msgstr "Daraja"
+
+msgid "Score Evaluation Breakdown"
+msgstr "Mgawanyo wa Tathmini ya Alama"
+
+msgid "Savings Behavior (Rate)"
+msgstr "Tabia ya Kuweka Akiba (Kiwango)"
+
+msgid "Debt-to-Asset Ratio"
+msgstr "Kiwango cha Deni kwa Mali"
+
+msgid "Budget Discipline"
+msgstr "Nidhamu ya Bajeti"
+
+msgid "Emergency Liquidity Reserve"
+msgstr "Akiba ya Dharura ya Kimiminika"
+
+msgid "30-Day Expense & Cash Flow Forecast"
+msgstr "Utabiri wa Siku 30 wa Matumizi na Mzunguko wa Pesa"
+
+msgid "Predictive Analytics"
+msgstr "Uchambuzi wa Utabiri"
+
+msgid "Est. Daily Spending"
+msgstr "Wastani wa Matumizi ya Kila Siku"
+
+msgid "Projected 30D Expense"
+msgstr "Matumizi Yaliyotabiriwa ya Siku 30"
+
+msgid "Current Liquid Balance"
+msgstr "Salio la Sasa Hivi"
+
+msgid "Projected End Balance"
+msgstr "Salio la Mwisho Lilotabiriwa"
+
+msgid "Deficit Risk Alert!"
+msgstr "Tahadhari ya Hatari ya Upungufu!"
+
+msgid "Based on your current spending rate, your liquid balance is projected to run negative over the next 30 days. Consider cutting non-essential expenses immediately."
+msgstr "Kulingana na kiwango chako cha sasa cha matumizi, salio lako linatarajiwa kuwa hasi katika siku 30 zijazo. Fikiria kupunguza matumizi yasiyo ya lazima mara moja."
+
+msgid "Needs attention. Watch out for high expenses and debt obligations."
+msgstr "Inahitaji uangalifu. Zingatia matumizi ya juu na madeni."
+
+# Net Worth
+msgid "Net Worth Tracking"
+msgstr "Ufuatiliaji wa Thamani Halisi"
+
+msgid "Your Total Net Worth"
+msgstr "Jumla ya Thamani Yako Halisi"
+
+msgid "Total Assets"
+msgstr "Jumla ya Mali"
+
+msgid "Total Liabilities"
+msgstr "Jumla ya Madeni"
+
+msgid "Assets Breakdown"
+msgstr "Mgawanyo wa Mali"
+
+msgid "Liabilities (Debts Owed)"
+msgstr "Madeni (Unayodaiwa)"
+
+msgid "Due"
+msgstr "Tarehe ya Malipo"
+
+msgid "No assets recorded yet. Add wallets/accounts to track assets."
+msgstr "Bado hakuna mali zilizorekodiwa. Ongeza pochi/akaunti ili kufuatilia mali."
+
+msgid "Zero liabilities! You owe no outstanding loans."
+msgstr "Hakuna madeni! Hudaidwi mkopo wowote."
+
+# Backup & Restore
+msgid "Backup & Restore System Data"
+msgstr "Hifadhi na Rejesha Data ya Mfumo"
+
+msgid "Backup & Restore Data"
+msgstr "Hifadhi na Rejesha Data"
+
+msgid "Create & Export Backup"
+msgstr "Unda na Hamisha Hifadhi (Backup)"
+
+msgid "Export a complete JSON backup of all your personal financial data including incomes, expenses, categories, budgets, savings goals, accounts, and debts."
+msgstr "Pakua hifadhi kamili ya JSON ya data yako yote ya fedha ikiwa ni pamoja na mapato, matumizi, aina, bajeti, malengo ya akiba, akaunti na madeni."
+
+msgid "Data is encrypted in transit and exported directly to your computer."
+msgstr "Data imelindwa na kuhamishwa moja kwa moja kwenye kompyuta yako."
+
+msgid "Download Complete Backup (JSON)"
+msgstr "Pakua Hifadhi Kamili (JSON)"
+
+msgid "Restore from Backup"
+msgstr "Rejesha kutoka kwenye Hifadhi"
+
+msgid "Upload a previously exported PFAMS JSON backup file to restore your transactions and financial goals."
+msgstr "Pakia faili la JSON lililohifadhiwa awali la PFAMS ili kurejesha miamala na malengo yako ya fedha."
+
+msgid "Select Backup File (.json)"
+msgstr "Chagua Faili la Hifadhi (.json)"
+
+msgid "Restoring will merge transactions into your account without overwriting existing unique entries."
+msgstr "Kurejesha kutaunganisha miamala kwenye akaunti yako bila kufuta iliyopo."
+
+msgid "Upload & Restore Backup"
+msgstr "Pakia na Urejeshe Hifadhi"
+
+# Reports & Exports
+msgid "Reports & Data Export"
+msgstr "Ripoti na Uhamishaji Data"
+
+msgid "Reports & Data Hub"
+msgstr "Kituo cha Ripoti na Data"
+
+msgid "Financial Reports & Exports"
+msgstr "Ripoti za Fedha na Uhamishaji Data"
+
+msgid "Generate customizable PDF statements, Excel sheets, CSV summaries or import data"
+msgstr "Tengeneza taarifa za PDF, majedwali ya Excel, muhtasari wa CSV au ingiza data"
+
+msgid "Import CSV Data"
+msgstr "Ingiza Data ya CSV"
+
+msgid "Generate Statement / Export"
+msgstr "Tengeneza Taarifa / Hamisha"
+
+msgid "Choose your date range and export format below."
+msgstr "Chagua tarehe na muundo wa kuhamisha hapa chini."
+
+msgid "Start Date"
+msgstr "Tarehe ya Kuanzia"
+
+msgid "Transaction Scope"
+msgstr "Upeo wa Miamala"
+
+msgid "All Inflows & Outflows (Comprehensive)"
+msgstr "Mapato na Matumizi Yote"
+
+msgid "Income Only"
+msgstr "Mapato Pekee"
+
+msgid "Expenses Only"
+msgstr "Matumizi Pekee"
+
+msgid "Download PDF"
+msgstr "Pakua PDF"
+
+msgid "Download Excel"
+msgstr "Pakua Excel"
+
+msgid "Download CSV"
+msgstr "Pakua CSV"
+
+msgid "Export Details"
+msgstr "Maelezo ya Uhamishaji"
+
+msgid "PDF Reports:"
+msgstr "Ripoti za PDF:"
+
+msgid "Formatted official financial statement with summaries, color-coded tables, and signature area."
+msgstr "Taarifa rasmi ya fedha yenye muhtasari na majedwali yenye rangi."
+
+msgid "Excel Spreadsheets:"
+msgstr "Majedwali ya Excel:"
+
+msgid "Styled multi-sheet workbook with automatic column auto-fitting and formula sums."
+msgstr "Kitabu cha majedwali chenye hesabu za kiotomatiki."
+
+msgid "CSV Files:"
+msgstr "Mafaili ya CSV:"
+
+msgid "UTF-8 encoded with BOM support, fully compatible with Microsoft Excel and third-party accounting packages."
+msgstr "Mafaili yanayooana kikamilifu na Microsoft Excel na mifumo mingine."
+
+msgid "Batch CSV Import"
+msgstr "Ingiza Miamala ya CSV kwa Pamoja"
+
+msgid "Have historical bank or mobile money transactions? Import them effortlessly."
+msgstr "Je, una miamala ya zamani ya benki au simu? Ingiza kwa urahisi."
+
+msgid "Go to CSV Import Tool"
+msgstr "Nenda kwenye Chombo cha Kuingiza CSV"
+
+# Financial Calendar
+msgid "Financial Calendar"
+msgstr "Kalenda ya Fedha"
+
+msgid "Upcoming Financial Commitments (Next 90 Days)"
+msgstr "Miamala na Siku za Malipo Zijazo (Siku 90 Zijazo)"
+
+msgid "Upcoming Events"
+msgstr "Matukio Zijazo"
+
+msgid "Event / Description"
+msgstr "Tukio / Maelezo"
+
+msgid "Status / Type"
+msgstr "Hali / Aina"
+
+msgid "No upcoming bill payments or deadlines"
+msgstr "Hakuna malipo ya bili au tarehe za mwisho zinazokuja"
+
+msgid "Add recurring transactions, debt payment schedules, or goal deadlines to view them on your financial calendar."
+msgstr "Ongeza miamala ya kila mara, ratiba za malipo ya madeni au tarehe za malengo ili kuziona kwenye kalenda yako."
+
+# Analytics Dashboard
+msgid "Financial Analytics"
+msgstr "Uchambuzi wa Fedha"
+
+msgid "Financial Analytics & Insights"
+msgstr "Uchambuzi wa Fedha na Maarifa"
+
+msgid "Analytics Dashboard"
+msgstr "Deshibodi ya Uchambuzi"
+
+msgid "Deep statistical analysis powered by Pandas & NumPy"
+msgstr "Uchambuzi wa kina wa takwimu wa hesabu za fedha"
+
+msgid "Today"
+msgstr "Leo"
+
+msgid "7 Days"
+msgstr "Siku 7"
+
+msgid "This Month"
+msgstr "Mwezi Huu"
+
+msgid "Last Month"
+msgstr "Mwezi Uliopita"
+
+msgid "This Year"
+msgstr "Mwaka Huu"
+
+msgid "Total Inflows"
+msgstr "Jumla ya Mapato"
+
+msgid "Total Outflows"
+msgstr "Jumla ya Matumizi"
+
+msgid "Daily Avg Burn"
+msgstr "Wastani wa Matumizi kwa Siku"
+
+msgid "transactions"
+msgstr "miamala"
+
+msgid "Statistical Anomalies Detected (Z-Score > 2.0)"
+msgstr "Tofauti zisizo za Kawaida Zilizogunduliwa"
+
+msgid "The system detected unusually high spending on the following dates compared to your baseline:"
+msgstr "Mfumo umegundua matumizi ya juu kuliko kawaida katika tarehe zifuatazo:"
+
+msgid "higher than standard deviation"
+msgstr "juu kuliko kipimo cha kawaida"
+
+msgid "12-Month Inflow / Outflow / Savings Curve"
+msgstr "Mwenendo wa Miezi 12 wa Mapato / Matumizi / Akiba"
+
+msgid "Expense by Category"
+msgstr "Matumizi kwa Aina"
+
+msgid "Payment Channel Distribution"
+msgstr "Mgawanyo wa Njia za Malipo"
+
+msgid "Income Streams"
+msgstr "Vyanzo vya Mapato"
+
+# Budgets
+msgid "Budget Management"
+msgstr "Usimamizi wa Bajeti"
+
+msgid "Budget Planner"
+msgstr "Mpangaji wa Bajeti"
+
+msgid "Budget Monitoring"
+msgstr "Ufuatiliaji wa Bajeti"
+
+msgid "Set spending limits by category to keep expenses on track"
+msgstr "Weka mipaka ya matumizi kwa kila aina ili kudhibiti matumizi"
+
+msgid "Create Budget"
+msgstr "Unda Bajeti"
+
+msgid "Spending Budget"
+msgstr "Bajeti ya Matumizi"
+
+msgid "Period"
+msgstr "Kipindi"
+
+msgid "Save Budget"
+msgstr "Hifadhi Bajeti"
+
+msgid "Budget Details"
+msgstr "Taarifa za Bajeti"
+
+msgid "Budget Limit"
+msgstr "Kikomo cha Bajeti"
+
+msgid "Total Spent"
+msgstr "Jumla Iliyotumika"
+
+msgid "Utilization"
+msgstr "Matumizi"
+
+msgid "Recent Expenses in this Category"
+msgstr "Matumizi ya Hivi Karibuni katika Aina Hii"
+
+msgid "No expenses logged for this category in the current period."
+msgstr "Hakuna matumizi yaliyorekodiwa kwa aina hii katika kipindi hiki."
+
+msgid "Details"
+msgstr "Taarifa"
+
+msgid "Delete this budget?"
+msgstr "Futa bajeti hii?"
+
+msgid "Spent"
+msgstr "Imetumika"
+
+msgid "Limit"
+msgstr "Kikomo"
+
+msgid "Used"
+msgstr "Imetumika"
+
+msgid "left"
+msgstr "zilibaki"
+
+msgid "Over by"
+msgstr "Imezidi kwa"
+
+msgid "No Budgets Defined"
+msgstr "Hakuna Bajeti Iliyowekwa"
+
+msgid "Create category spending budgets to monitor your outflows automatically."
+msgstr "Unda bajeti za matumizi ili kufuatilia gharama zako moja kwa moja."
+
+msgid "Create a Budget"
+msgstr "Unda Bajeti"
+
+# Goals
+msgid "Financial Savings Goals"
+msgstr "Malengo ya Akiba ya Fedha"
+
+msgid "Track targets for emergency funds, major purchases, investments, and more"
+msgstr "Fuatilia malengo ya akiba ya dharura, manunuzi makubwa, uwekezaji na mengineyo"
+
+msgid "New Goal"
+msgstr "Lengo Jipya"
+
+msgid "Goal"
+msgstr "Lengo"
+
+msgid "Savings Goal"
+msgstr "Lengo la Akiba"
+
+msgid "Save Goal"
+msgstr "Hifadhi Lengo"
+
+msgid "Goal Details"
+msgstr "Taarifa za Lengo"
+
+msgid "days"
+msgstr "siku"
+
+msgid "Add Contribution"
+msgstr "Weka Akiba Zaidi"
+
+msgid "Deposit Funds"
+msgstr "Weka Pesa"
+
+msgid "Goal Completed! Target achieved."
+msgstr "Lengo Limekamilika! Kiasi kimefikiwa."
+
+msgid "Delete this goal and its contribution history?"
+msgstr "Futa lengo hili pamoja na historia ya akiba zake?"
+
+msgid "Contribution History"
+msgstr "Historia ya Akiba"
+
+msgid "Recorded At"
+msgstr "Imerekodiwa Mnamo"
+
+msgid "No contributions deposited yet."
+msgstr "Bado hakuna akiba zilizowekwa."
+
+msgid "Active Goals"
+msgstr "Malengo Yanayoendelea"
+
+msgid "Saved"
+msgstr "Iliyowekwa Akiba"
+
+msgid "Target"
+msgstr "Lengo"
+
+msgid "days left"
+msgstr "siku zilizobaki"
+
+msgid "Contribute / View"
+msgstr "Weka Akiba / Tazama"
+
+msgid "You don't have any active savings goals."
+msgstr "Huna malengo yoyote ya akiba yanayoendelea."
+
+msgid "Create your first goal"
+msgstr "Unda lengo lako la kwanza"
+
+msgid "Completed Goals"
+msgstr "Malengo Yaliyokamilika"
+
+msgid "Target achieved!"
+msgstr "Lengo limefikiwa!"
+
+msgid "View History"
+msgstr "Tazama Historia"
+
+msgid "No description provided."
+msgstr "Hakuna maelezo yaliyotolewa."
+
+# Accounts & Wallets & Transfers
+msgid "My Wallets & Accounts"
+msgstr "Pochi na Akaunti Zangu"
+
+msgid "Account"
+msgstr "Akaunti"
+
+msgid "Save Account"
+msgstr "Hifadhi Akaunti"
+
+msgid "Total Balance"
+msgstr "Jumla ya Salio"
+
+msgid "Active Accounts"
+msgstr "Akaunti Zilizopo"
+
+msgid "Add Account"
+msgstr "Ongeza Akaunti"
+
+msgid "Transfer"
+msgstr "Hamisha"
+
+msgid "Edit Account"
+msgstr "Hariri Akaunti"
+
+msgid "Deactivate this account?"
+msgstr "Zima akaunti hii?"
+
+msgid "Deactivate"
+msgstr "Zima"
+
+msgid "Current Balance"
+msgstr "Salio la Sasa"
+
+msgid "No accounts yet"
+msgstr "Bado hakuna akaunti"
+
+msgid "Add your cash, bank, or mobile money accounts to track your balances."
+msgstr "Ongeza pesa taslimu, akaunti za benki au simu ili kufuatilia salio."
+
+msgid "Add First Account"
+msgstr "Ongeza Akaunti ya Kwanza"
+
+msgid "Recent Transfers"
+msgstr "Uhamishaji wa Hivi Karibuni"
+
+msgid "Transfer Between Accounts"
+msgstr "Hamisha Pesa Baina ya Akaunti"
+
+msgid "New Transfer"
+msgstr "Uhamishaji Mpya"
+
+msgid "Transfers move money between your accounts and are not counted as income or expense."
+msgstr "Uhamishaji unahamisha pesa baina ya akaunti zako na hauhesabiwi kama mapato au matumizi."
+
+msgid "Record Transfer"
+msgstr "Rekodi Uhamishaji"
+
+msgid "Transfers History"
+msgstr "Historia ya Uhamishaji"
+
+msgid "Transfer History"
+msgstr "Historia ya Uhamishaji"
+
+msgid "From"
+msgstr "Kutoka"
+
+msgid "To"
+msgstr "Kwenda"
+
+msgid "Delete this transfer?"
+msgstr "Futa uhamishaji huu?"
+
+msgid "No transfers recorded"
+msgstr "Hakuna uhamishaji uliorekodiwa"
+
+msgid "Transfer funds between your accounts without affecting income/expense totals."
+msgstr "Hamisha pesa baina ya akaunti zako bila kuathiri jumla ya mapato na matumizi."
+
+# Debts & Loans
+msgid "Debt / Loan"
+msgstr "Deni / Mkopo"
+
+msgid "Add Debt / Loan"
+msgstr "Ongeza Deni / Mkopo"
+
+msgid "Edit Debt / Loan"
+msgstr "Hariri Deni / Mkopo"
+
+msgid "Delete this debt permanently?"
+msgstr "Futa deni hili kabisa?"
+
+msgid "Repaid"
+msgstr "Kilicholipwa"
+
+msgid "Interest Rate"
+msgstr "Kiwango cha Riba"
+
+msgid "Record Payment"
+msgstr "Rekodi Malipo"
+
+msgid "Payment History"
+msgstr "Historia ya Malipo"
+
+msgid "Method"
+msgstr "Njia ya Malipo"
+
+msgid "No payments recorded yet."
+msgstr "Bado hakuna malipo yaliyorekodiwa."
+
+msgid "Total I Owe"
+msgstr "Jumla Ninayodaiwa"
+
+msgid "Total Owed to Me"
+msgstr "Jumla Ninayodai"
+
+msgid "Loans I Owe"
+msgstr "Mikopo Ninayodaiwa"
+
+msgid "Name"
+msgstr "Jina"
+
+msgid "Principal"
+msgstr "Kiasi cha Msingi"
+
+msgid "Paid"
+msgstr "Kilicholipwa"
+
+msgid "Remaining"
+msgstr "Iliyobaki"
+
+msgid "Due Date"
+msgstr "Tarehe ya Malipo"
+
+msgid "Status"
+msgstr "Hali"
+
+msgid "No outstanding loans. Great job!"
+msgstr "Hakuna mikopo inayodaiwa. Kazi nzuri!"
+
+msgid "Owed to Me"
+msgstr "Pesa Ninazodai"
+
+msgid "Received"
+msgstr "Kilichopokelewa"
+
+msgid "No receivables tracked."
+msgstr "Hakuna madeni unayodai yaliyorekodiwa."
+
+# Notifications
+msgid "Notifications"
+msgstr "Arifa"
+
+msgid "System & Financial Notifications"
+msgstr "Arifa za Mfumo na Fedha"
+
+msgid "Notifications & Alerts"
+msgstr "Arifa na Tahadhari"
+
+msgid "System alerts, budget threshold warnings, and goal milestones"
+msgstr "Tahadhari za mfumo, onyo za mipaka ya bajeti na mafanikio ya malengo"
+
+msgid "Mark All as Read"
+msgstr "Weka Zote kama Zimesomwa"
+
+msgid "ago"
+msgstr "iliyopita"
+
+msgid "Mark Read"
+msgstr "Weka kama Imesomwa"
+
+msgid "No Notifications"
+msgstr "Hakuna Arifa"
+
+msgid "You're all caught up! There are no notifications or alerts at this time."
+msgstr "Uko tayari! Hakuna arifa au tahadhari kwa sasa."
+
+# Categories
+msgid "Transaction Categories"
+msgstr "Aina za Miamala"
+
+msgid "Organize your income and expenses into meaningful categories"
+msgstr "Panga mapato na matumizi yako katika makundi yenye maana"
+
+msgid "Add Category"
+msgstr "Ongeza Aina"
+
+msgid "My Custom Categories"
+msgstr "Aina Zangu za Kibinafsi"
+
+msgid "Icon"
+msgstr "Picha / Ikoni"
+
+msgid "Delete this category?"
+msgstr "Futa aina hii?"
+
+msgid "No custom categories created yet."
+msgstr "Bado hujaunda aina yoyote ya kibinafsi."
+
+msgid "System Default Categories"
+msgstr "Aina za Mfumo za Kawaida"
+
+msgid "Default"
+msgstr "Kawaida"
+
+msgid "No system default categories found."
+msgstr "Hakuna aina za kawaida za mfumo zilizopatikana."
+
+msgid "Color"
+msgstr "Rangi"
+
+msgid "Category name"
+msgstr "Jina la aina"
+
+# Common Buttons / Actions
+msgid "Save"
+msgstr "Hifadhi"
+
+msgid "Cancel"
+msgstr "Ghairi"
+
+msgid "Delete"
+msgstr "Futa"
+
+msgid "Edit"
+msgstr "Hariri"
+
+msgid "Back"
+msgstr "Rudi"
+
+msgid "Submit"
+msgstr "Wasilisha"
+
+msgid "Filter"
+msgstr "Chuja"
+
+msgid "Reset"
+msgstr "Weka Upya"
+
+msgid "Export"
+msgstr "Hamisha Nje"
+
+msgid "Download"
+msgstr "Pakua"
+
+msgid "Print"
+msgstr "Chapisha"
+
+msgid "Close"
+msgstr "Funga"
+
+msgid "Confirm"
+msgstr "Thibitisha"
+
+msgid "Yes"
+msgstr "Ndiyo"
+
+msgid "No"
+msgstr "Hapana"
+
+# Analytics Chart Labels
+msgid "Income"
+msgstr "Mapato"
+
+msgid "Expense"
+msgstr "Matumizi"
+
+msgid "Net Savings"
+msgstr "Akiba Halisi"
+
+# Recurring Form Labels
+msgid "Recurring Transaction"
+msgstr "Muamala wa Kujirudia"
+
+msgid "Recurring Schedule"
+msgstr "Ratiba ya Kujirudia"
+
+msgid "Title / Description"
+msgstr "Kichwa / Maelezo"
+
+msgid "Amount (TZS)"
+msgstr "Kiasi (TZS)"
+
+msgid "Transaction Type"
+msgstr "Aina ya Muamala"
+
+msgid "Frequency"
+msgstr "Marudio"
+
+msgid "Category"
+msgstr "Kategoria"
+
+msgid "Payment Method"
+msgstr "Njia ya Malipo"
+
+msgid "Start Date"
+msgstr "Tarehe ya Kuanza"
+
+msgid "Next Due Date"
+msgstr "Tarehe Inayofuata"
+
+msgid "End Date"
+msgstr "Tarehe ya Mwisho"
+
+msgid "Optional"
+msgstr "Si Lazima"
+
+msgid "Notes"
+msgstr "Maelezo ya Ziada"
+
+msgid "Save Schedule"
+msgstr "Hifadhi Ratiba"
+
+msgid "Expenses"
+msgstr "Matumizi"
+
+msgid "Savings"
+msgstr "Akiba"
+
+# Goal List Fallbacks
+msgid "No description provided."
+msgstr "Hakuna maelezo yaliyotolewa."
+
+msgid "No deadline"
+msgstr "Hakuna tarehe ya mwisho"
+
+msgid "Deadline"
+msgstr "Mwisho wa Tarehe"
+
+# Halotel (proper noun)
+msgid "Halotel"
+msgstr "Halotel"
+
+# Dashboard Balance Labels
+msgid "Total Balance"
+msgstr "Jumla ya Salio"
+
+msgid "Net savings"
+msgstr "Akiba Halisi"
+
+# Debt Overpayment Dialog
+msgid "Overpayment Detected"
+msgstr "Malipo Yanayozidi Yamegunduliwa"
+
+msgid "Your payment exceeds the outstanding balance."
+msgstr "Malipo yako yanazidi salio linalobaki."
+
+msgid "Amount Due"
+msgstr "Kiasi Kinachohitajika"
+
+msgid "You Entered"
+msgstr "Uliingiza"
+
+msgid "Overpayment"
+msgstr "Malipo Yanayozidi"
+
+msgid "Do you want to proceed with this payment? The full amount you entered will be recorded."
+msgstr "Je, unataka kuendelea na malipo haya? Kiasi chote ulichoingiza kitarekodiwa."
+
+msgid "Confirm Payment"
+msgstr "Thibitisha Malipo"
+
+msgid "Checking..."
+msgstr "Inakagua..."
+
+msgid "An error occurred. Please try again."
+msgstr "Hitilafu imetokea. Tafadhali jaribu tena."
+
+msgid "Network error. Please try again."
+msgstr "Hitilafu ya mtandao. Tafadhali jaribu tena."
+
+msgid "Payment amount must be greater than zero."
+msgstr "Kiasi cha malipo lazima kiwe zaidi ya sifuri."
+
+msgid "Payment of TZS %(amount)s exceeds the remaining balance of TZS %(remaining)s. Please confirm the overpayment."
+msgstr "Malipo ya TZS %(amount)s yanazidi salio linalobaki la TZS %(remaining)s. Tafadhali thibitisha malipo yanayozidi."
+
+msgid "Repayment of TZS %(amount)s recorded."
+msgstr "Malipo ya TZS %(amount)s yamerekodiwa."
+

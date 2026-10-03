@@ -1,0 +1,540 @@
+
+================================================================================
+        PFAMS — PERSONAL FINANCIAL ANALYTICS & MANAGEMENT SYSTEM
+                    COMPLETE SYSTEM FEATURES DOCUMENTATION
+================================================================================
+
+Project   : PFAMS — Personal Financial Analytics & Management System
+Version   : 1.0.0
+Currency  : Tanzanian Shilling (TZS)
+Languages : English | Swahili (Kiswahili)
+Last Updated : August 26, 2026
+
+================================================================================
+                          TABLE OF CONTENTS
+================================================================================
+
+  1.  User Accounts & Authentication
+  2.  Dashboard & Overview
+  3.  Income Management
+  4.  Expense Management
+  5.  Transaction History & Filtering
+  6.  Budget Planning & Monitoring
+  7.  Savings Goals Tracker
+  8.  Wallets & Accounts Management
+  9.  Fund Transfers
+  10. Debt & Loan Tracker
+  11. Recurring Transactions
+  12. Financial Analytics Engine
+  13. Financial Health Index & Score
+  14. Net Worth Tracker
+  15. Financial Calendar
+  16. Notifications & Alerts
+  17. Reports, Exports & CSV Import
+  18. Backup & Restore System
+  19. Language Switching (EN / SW)
+  20. Progressive Web App (PWA)
+  21. Dark Mode & UI Theming
+  22. Admin Panel
+
+================================================================================
+  FEATURE 1 — USER ACCOUNTS & AUTHENTICATION
+================================================================================
+
+  ✔ User Registration with full name, email, and username
+  ✔ Secure login with username and password
+  ✔ "Remember Me" option for persistent sessions
+  ✔ Change Password with current password verification
+  ✔ New password mismatch and minimum length validation
+  ✔ User Profile editing (full name, phone, photo, currency, timezone)
+  ✔ Profile photo upload and display
+  ✔ Preferred currency selection (TZS default)
+  ✔ Timezone configuration for accurate date/time display
+  ✔ Monthly Income Target setting (for health calculations)
+  ✔ Monthly Savings Target setting (for dashboard insights)
+  ✔ Avatar fallback display using user initials when no photo uploaded
+  ✔ Online/Offline status badge in topbar
+  ✔ Secure logout with session cleanup
+
+================================================================================
+  FEATURE 2 — DASHBOARD & OVERVIEW
+================================================================================
+
+  ✔ Central overview of key financial metrics at a glance
+  ✔ Monthly Income summary card with growth indicator
+  ✔ Monthly Expenses summary card with trend arrow
+  ✔ Net Savings card (Income minus Expenses)
+  ✔ Savings Rate percentage display
+  ✔ Daily Average Spending metric
+  ✔ Budget Status overview strip (all budgets in one view)
+  ✔ Top 5 recent transactions panel
+  ✔ Active Savings Goals progress bar panel
+  ✔ Interactive Chart: Monthly Income vs Expense bar chart
+  ✔ Interactive Chart: Expense breakdown by category (doughnut chart)
+  ✔ Insights panel with personalized financial tips
+  ✔ Quick Action buttons (Add Income, Add Expense, New Transfer, etc.)
+
+================================================================================
+  FEATURE 3 — INCOME MANAGEMENT
+================================================================================
+
+  ✔ Record income transactions with full details
+  ✔ Fields: Amount (TZS), Source/Payer, Category, Date, Payment Method,
+            Description, Notes, Attachment / Receipt upload
+  ✔ Payment Methods: Cash, M-Pesa, Airtel Money, Tigo Pesa, Bank, Card, Other
+  ✔ Link income to a specific wallet/account
+  ✔ Category filtering (income-type categories only)
+  ✔ File/image attachment support (receipts, slips)
+  ✔ Edit existing income records
+  ✔ Delete income records with confirmation dialog
+  ✔ View full income detail page
+  ✔ Income list with search and filter bar
+  ✔ Pagination on income list
+  ✔ Running totals shown in list view
+
+================================================================================
+  FEATURE 4 — EXPENSE MANAGEMENT
+================================================================================
+
+  ✔ Record expense transactions with full details
+  ✔ Fields: Amount (TZS), Description, Category, Date, Time (optional),
+            Payment Method, Notes, Receipt Upload
+  ✔ Optional time stamp for precise expense tracking
+  ✔ Link expense to a specific wallet/account
+  ✔ Category filtering (expense-type categories only)
+  ✔ Receipt image upload and display
+  ✔ Edit existing expense records
+  ✔ Delete expense records with confirmation dialog
+  ✔ View full expense detail page
+  ✔ Expense list with search and filter bar
+  ✔ Pagination on expense list
+
+================================================================================
+  FEATURE 5 — TRANSACTION HISTORY & FILTERING
+================================================================================
+
+  ✔ Combined chronological view of all income and expense transactions
+  ✔ Powerful Filter Panel:
+       - Search by keyword (description or source)
+       - Filter by transaction type (Income / Expense / All)
+       - Filter by category
+       - Filter by payment method
+       - Filter by date range (From Date → To Date)
+       - Filter by amount range (Min → Max)
+       - Sort by Date (Newest / Oldest) or Amount (Highest / Lowest)
+  ✔ Color-coded rows (green for income, red for expense)
+  ✔ Payment method badges
+  ✔ Category icons and color indicators
+  ✔ Inline quick links to full detail page
+  ✔ Pagination for large transaction lists
+
+================================================================================
+  FEATURE 6 — BUDGET PLANNING & MONITORING
+================================================================================
+
+  ✔ Create spending budgets per category
+  ✔ Budget periods: Weekly, Monthly, Yearly, Custom (date range)
+  ✔ Real-time spending vs. budget tracking
+  ✔ Visual progress bars (green / warning / danger based on usage %)
+  ✔ Budget status flags:
+       - Under budget (green)
+       - Near limit / Warning at 80% (yellow)
+       - Exceeded / Overspent (red)
+  ✔ Budget detail page showing:
+       - Total limit, amount spent, remaining, utilization %
+       - Recent expenses in that category within the period
+  ✔ Edit and delete budgets with confirmation
+  ✔ Budget Management page listing all budgets with spending bars
+  ✔ Automatic amount recalculation when new expenses are added
+  ✔ Budget alerts via notifications when threshold is crossed
+
+================================================================================
+  FEATURE 7 — SAVINGS GOALS TRACKER
+================================================================================
+
+  ✔ Create financial goals with name, description, target amount, target date
+  ✔ Optional category label for goal organization
+  ✔ Track current savings progress per goal
+  ✔ Deposit contributions (funds) toward a goal manually
+  ✔ Automatically updates progress percentage
+  ✔ Visual progress bar per goal (color-coded by completion %)
+  ✔ Days remaining countdown to target date
+  ✔ Required monthly saving calculation based on remaining amount and time
+  ✔ Goal completion detection and badge display
+  ✔ Contribution history log per goal (amount, date, notes)
+  ✔ Delete goals with full contribution history cleanup
+  ✔ Separate view for Active Goals and Completed Goals
+  ✔ Goals appear on Dashboard and Net Worth pages
+
+================================================================================
+  FEATURE 8 — WALLETS & ACCOUNTS MANAGEMENT
+================================================================================
+
+  ✔ Create and manage multiple financial accounts/wallets
+  ✔ Account Types: Cash, Bank Account, M-Pesa, Airtel Money, Tigo Pesa,
+                   Savings Account, Other
+  ✔ Account fields: Name, Type, Account Number, Opening Balance, Color, Notes
+  ✔ Custom color picker per account for easy visual identification
+  ✔ Automatic icon assignment based on account type (Bootstrap icons)
+  ✔ Real-time current balance calculation:
+       Opening Balance + Incomes received + Transfers in
+       − Expenses paid − Transfers out
+  ✔ Total Balance across all active accounts displayed at top
+  ✔ Deactivate accounts (instead of deleting) to preserve history
+  ✔ Edit account details
+  ✔ Link income and expense records to specific accounts
+  ✔ Accounts used as asset values in Net Worth calculation
+
+================================================================================
+  FEATURE 9 — FUND TRANSFERS
+================================================================================
+
+  ✔ Transfer money between your own accounts (no income/expense recorded)
+  ✔ Fields: From Account, To Account, Amount, Date, Notes
+  ✔ Validation: Cannot transfer to and from the same account
+  ✔ Transfers automatically update both account balances
+  ✔ Transfer history list with chronological view
+  ✔ Delete transfer records with confirmation
+  ✔ Transfers displayed as separate section on Wallets page
+
+================================================================================
+  FEATURE 10 — DEBT & LOAN TRACKER
+================================================================================
+
+  ✔ Track two debt directions:
+       - Loan (I Owe)        — money you borrowed from someone
+       - Receivable (Owed to Me) — money someone owes you
+  ✔ Debt fields: Type, Name (person/institution), Description,
+                 Principal Amount, Interest Rate (% p.a.),
+                 Start Date, Due Date, Notes
+  ✔ Debt Status tracking: Active, Paid Off, Overdue, Partially Paid
+  ✔ Automatic overdue detection based on due date vs today
+  ✔ Record repayment payments per debt:
+       - Amount paid, Date, Payment Method, Notes
+  ✔ Running totals: Total Paid, Remaining Balance, % Paid progress bar
+  ✔ Payment history log per debt
+  ✔ Summary totals on list page:
+       - Total I Owe (all active loans)
+       - Total Owed to Me (all active receivables)
+  ✔ Separate sections for Loans and Receivables on list page
+  ✔ Debts appear as liabilities in Net Worth calculation
+
+================================================================================
+  FEATURE 11 — RECURRING TRANSACTIONS
+================================================================================
+
+  ✔ Schedule repeating income or expense transactions
+  ✔ Fields: Title, Amount, Transaction Type, Category, Payment Method,
+            Frequency, Start Date, Next Due Date, End Date (optional)
+  ✔ Frequencies: Daily, Weekly, Monthly, Yearly
+  ✔ Pause / Resume recurring schedules (toggle active status)
+  ✔ View all schedules in a list with next due date displayed
+  ✔ Delete recurring schedules with confirmation
+  ✔ Recurring due dates appear on the Financial Calendar
+  ✔ Useful for: Rent, Salaries, Subscriptions, Loan repayments, Bills
+
+================================================================================
+  FEATURE 12 — FINANCIAL ANALYTICS ENGINE
+================================================================================
+
+  ✔ Deep statistical analysis of your financial data using Pandas & NumPy
+  ✔ Time period selector: Today / 7 Days / This Month / Last Month / This Year
+  ✔ Key Metrics Panel:
+       - Total Inflows (income within period)
+       - Total Outflows (expenses within period)
+       - Net Savings (inflows − outflows)
+       - Daily Average Burn rate
+       - Total transaction count
+  ✔ 12-Month Trend Chart: Income / Expense / Net Savings curve (line chart)
+  ✔ Expense by Category pie/doughnut chart with percentage breakdown
+  ✔ Payment Channel Distribution chart (Cash, M-Pesa, Bank, etc.)
+  ✔ Income Streams breakdown (by source)
+  ✔ Statistical Anomaly Detection using Z-Score:
+       - Automatically identifies days with unusually high spending
+       - Flags transactions more than 2 standard deviations above average
+       - Shows exact date and how much above normal the spending was
+  ✔ All charts rendered using Chart.js for smooth interactivity
+
+================================================================================
+  FEATURE 13 — FINANCIAL HEALTH INDEX & SCORE
+================================================================================
+
+  ✔ Calculates a personal Financial Health Score from 0 to 100
+  ✔ Displays a Grade: A+ (Excellent), A (Great), B (Good), C (Fair), D (Poor)
+  ✔ Score is built from 4 sub-components:
+
+       COMPONENT 1 — Savings Behavior (Savings Rate %)
+          Measures what % of income is being saved each month
+
+       COMPONENT 2 — Debt-to-Asset Ratio
+          Measures total debts vs total assets (wallets + goals)
+          Lower ratio = better score
+
+       COMPONENT 3 — Budget Discipline
+          Measures what % of budgets are on track vs exceeded
+
+       COMPONENT 4 — Emergency Liquidity Reserve
+          Measures if liquid balance can cover multiple months of expenses
+
+  ✔ Score Evaluation Breakdown panel showing score per component
+  ✔ Color-coded progress bars per component
+  ✔ 30-Day Cash Flow Forecast:
+       - Estimated daily spending (based on historical average)
+       - Projected 30-day expense total
+       - Current liquid balance (all accounts)
+       - Projected end-of-month balance
+  ✔ Deficit Risk Alert if projected balance goes negative
+  ✔ Personalized actionable feedback messages based on score grade
+
+================================================================================
+  FEATURE 14 — NET WORTH TRACKER
+================================================================================
+
+  ✔ Calculates your total net worth: Assets − Liabilities
+  ✔ Assets include:
+       - All active wallet/account balances (current balance)
+       - Total saved in all active savings goals
+  ✔ Liabilities include:
+       - All active loan/debt remaining balances (loans you owe)
+  ✔ Displays: Total Assets, Total Liabilities, Net Worth (difference)
+  ✔ Assets Breakdown table: each account with its current balance
+  ✔ Liabilities list: each debt with principal, repaid, remaining, due date
+  ✔ Color-coded net worth (positive = green, negative = red)
+  ✔ Shows "Zero Liabilities" success message if no active debts
+
+================================================================================
+  FEATURE 15 — FINANCIAL CALENDAR
+================================================================================
+
+  ✔ Visual calendar of upcoming financial events and commitments
+  ✔ Shows events for the next 90 days
+  ✔ Types of events displayed:
+       - Recurring transaction due dates (rent, salaries, subscriptions)
+       - Debt/loan due dates
+       - Savings goal target dates
+  ✔ Each event shows: Date, Description, Type/Status badge
+  ✔ Color-coded event types for quick identification
+  ✔ Helps plan cash flow and avoid missed payments
+
+================================================================================
+  FEATURE 16 — NOTIFICATIONS & ALERTS
+================================================================================
+
+  ✔ System-generated financial alerts and reminders
+  ✔ Notification types:
+       - Budget threshold warning (80% of budget used)
+       - Budget exceeded alert (100%+ spent)
+       - Goal milestone reached (goal completed)
+       - Debt overdue alert
+       - Recurring transaction due reminder
+  ✔ Notification bell icon in topbar showing unread count badge
+  ✔ Notifications list page with all alerts in reverse chronological order
+  ✔ Mark individual notifications as read
+  ✔ Mark All as Read (bulk action)
+  ✔ Time-ago display (e.g., "2 hours ago", "3 days ago")
+  ✔ Empty state message when no notifications
+
+================================================================================
+  FEATURE 17 — REPORTS, EXPORTS & CSV IMPORT
+================================================================================
+
+  EXPORTS:
+  ✔ Date range selector (Start Date → End Date)
+  ✔ Scope selection: All Transactions / Income Only / Expenses Only
+  ✔ PDF Report:
+       - Official formatted financial statement
+       - Header with user name, currency, date range
+       - Color-coded transaction table
+       - Summary totals (income, expenses, net savings)
+       - Signature/certification area at the bottom
+  ✔ Excel Report (.xlsx):
+       - Multi-column styled spreadsheet
+       - Auto-fitted column widths
+       - Header row with bold styling
+       - Formula sum row for totals
+  ✔ CSV Export:
+       - UTF-8 with BOM (compatible with Excel and accounting software)
+       - Clean headers and formatted values
+  ✔ Direct download to browser (no server storage)
+
+  IMPORT:
+  ✔ CSV Import Tool for batch importing historical transactions
+  ✔ Upload a CSV file with standard columns
+  ✔ Preview imported data before confirming
+  ✔ Automatically maps: date, amount, description, type, category
+  ✔ Duplicate detection to avoid re-importing existing records
+  ✔ Import result summary (records added, skipped, errors)
+
+================================================================================
+  FEATURE 18 — BACKUP & RESTORE SYSTEM
+================================================================================
+
+  ✔ Full data backup export as a single JSON file
+  ✔ Backup includes:
+       - All income records
+       - All expense records
+       - All categories
+       - All budget records
+       - All savings goals and contributions
+       - All wallet accounts
+       - All fund transfers
+       - All debt records and repayments
+  ✔ One-click download of backup file to your computer
+  ✔ Data exported securely and directly (no cloud storage)
+  ✔ Restore: Upload a previously exported JSON backup
+  ✔ Merge restore: adds data without overwriting existing unique records
+  ✔ Restore result summary shown after import
+
+================================================================================
+  FEATURE 19 — LANGUAGE SWITCHING (ENGLISH / SWAHILI)
+================================================================================
+
+  ✔ Full dual-language support: English (EN) and Swahili (SW)
+  ✔ Language toggle button in topbar (after notification bell)
+  ✔ Language persists across page reloads and browser sessions
+  ✔ 100% translated UI elements:
+       - All navigation menus and sidebar links
+       - All page titles and headings
+       - All form field labels, placeholders, and help text
+       - All button labels and action texts
+       - All model dropdown choices (e.g., Loan (I Owe), Cash, Weekly, etc.)
+       - All validation error messages
+       - All chart labels and legends
+       - All table headers
+       - All empty-state messages
+       - All notification messages
+       - All confirmation dialogs
+  ✔ Translation catalog: 445 messages compiled to binary (.mo)
+  ✔ Built using Django's native i18n framework (gettext / gettext_lazy)
+  ✔ Easy to add more languages by adding a new locale folder
+
+================================================================================
+  FEATURE 20 — PROGRESSIVE WEB APP (PWA)
+================================================================================
+
+  ✔ Installable as a native app on Windows, Android, iOS, and MacOS
+  ✔ "Install PFAMS" banner appears in browser (dismissible)
+  ✔ Works offline via Service Worker caching
+  ✔ Offline fallback page shown when no internet connection
+  ✔ App icon and splash screen for installed version
+  ✔ Web Manifest file with app name, colors, and icons
+  ✔ Background sync for deferred data submission (when reconnected)
+  ✔ Runs in standalone mode (no browser chrome when installed)
+
+================================================================================
+  FEATURE 21 — DARK MODE & UI THEMING
+================================================================================
+
+  ✔ Full dark mode interface (default system theme)
+  ✔ Dark/Light mode toggle button in topbar
+  ✔ Theme preference saved in browser localStorage (persists across sessions)
+  ✔ Smooth CSS transition between light and dark modes
+  ✔ All components support both themes:
+       - Sidebar, topbar, cards, tables, forms, modals, charts
+  ✔ Glassmorphism effect on cards and panels
+  ✔ Smooth micro-animations and hover effects throughout
+  ✔ Color-coded status badges (success, warning, danger, info)
+  ✔ Responsive layout: works on desktop, tablet, and mobile screens
+  ✔ Bootstrap 5 based layout system with custom CSS overrides
+  ✔ Bootstrap Icons used throughout the interface
+  ✔ Inter font (Google Fonts) for clean modern typography
+
+================================================================================
+  FEATURE 22 — ADMIN PANEL
+================================================================================
+
+  ✔ Full Django Admin interface at /admin/
+  ✔ Manage all users and user profiles
+  ✔ View and edit all transaction records (income & expense)
+  ✔ Manage categories (add system defaults)
+  ✔ View all budget records
+  ✔ View all savings goals and contribution logs
+  ✔ Manage wallet accounts and transfers
+  ✔ View and manage debt records and repayments
+  ✔ View all notifications
+  ✔ Search and filter on all models
+  ✔ Bulk actions on records
+  ✔ Secure access via superuser credentials
+
+================================================================================
+                         SUMMARY — TOTAL FEATURE COUNT
+================================================================================
+
+  Category                          Count
+  ──────────────────────────────────────────────────────
+  User Auth & Profile               15 features
+  Dashboard                         12 features
+  Income Management                 10 features
+  Expense Management                10 features
+  Transaction History               10 features
+  Budget Planning                   13 features
+  Savings Goals                     14 features
+  Wallets & Accounts                12 features
+  Fund Transfers                     8 features
+  Debt & Loan Tracker               18 features
+  Recurring Transactions            10 features
+  Analytics Engine                  14 features
+  Financial Health Score            12 features
+  Net Worth Tracker                  8 features
+  Financial Calendar                 7 features
+  Notifications & Alerts            10 features
+  Reports, Exports & Import         18 features
+  Backup & Restore                  10 features
+  Language Switching (EN/SW)        14 features
+  Progressive Web App (PWA)          8 features
+  Dark Mode & UI Theming            12 features
+  Admin Panel                       12 features
+  ──────────────────────────────────────────────────────
+  TOTAL SYSTEM FEATURES           ~ 247+ features
+
+================================================================================
+                  PLANNED FEATURES — NOT YET IMPLEMENTED
+================================================================================
+
+  The following features are identified but not yet built in version 1.0.0.
+  They are planned for the next development phase.
+
+  [ ] Account Reconciliation
+      Compare recorded account balance against actual bank statement balance
+      and flag any discrepancies.
+
+  [ ] Auto-Schedule Recurring Transactions
+      Automatically run "generate_recurring" daily via Windows Task Scheduler
+      so recurring income/expense records are created without manual command.
+
+  [ ] Real Email Delivery (SMTP)
+      Configure a real email provider (Gmail, Mailgun, etc.) so that password
+      reset links are delivered to the user's inbox instead of the console.
+
+  [ ] Swahili Chart Labels
+      Chart.js dataset labels (Income, Expenses, Net Savings) currently display
+      in English only. These will be translated using Django template tags.
+
+  [ ] Swahili Offline/Online Status Messages
+      "Online", "Offline", "Syncing data..." toast messages in offline.js
+      are currently English only. Will be made translatable via data-* attributes.
+
+  [ ] Month-over-Month Spending Comparison
+      A chart comparing current month spending vs. previous month, highlighting
+      categories where spending increased or decreased significantly.
+
+  [ ] Budget Rollover
+      Allow unused budget amounts to carry forward to the next period
+      instead of resetting to zero each cycle.
+
+  [ ] Transaction Duplicate Detection on Import
+      When importing CSV files, detect and skip rows that appear to already
+      exist in the database (same date, amount, and description).
+
+  [ ] Two-Factor Authentication (2FA)
+      Add an optional second login step using an authenticator app (TOTP)
+      or SMS code for enhanced account security.
+
+  [ ] Subscription Tracker
+      A dedicated view that lists all recurring expenses that represent
+      subscriptions (e.g. Netflix, internet, insurance) with a total
+      monthly/annual cost summary.
+
+================================================================================
+                    END OF FEATURE DOCUMENTATION — PFAMS v1.0.0
+================================================================================

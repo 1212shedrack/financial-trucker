@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Reports" %}{% endblock %}
+{% block page_title %}{% trans "Reports and Data Hub" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Financial Reports & Exports" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Generate customizable PDF statements, Excel sheets, CSV summaries or import data" %}</p>
+  </div>
+  <a href="{% url 'reports_import' %}" class="btn btn-outline-primary"><i class="bi bi-upload me-1"></i> {% trans "Import CSV Data" %}</a>
+</div>
+
+<div class="row g-4">
+  <!-- Export Filter Form -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm p-4 h-100">
+      <h5 class="fw-bold mb-3"><i class="bi bi-download text-success me-2"></i>{% trans "Generate Statement / Export" %}</h5>
+      <p class="text-muted small mb-4">{% trans "Choose your date range and export format below." %}</p>
+
+      <form id="exportForm" method="get">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "Start Date" %}</label>
+            <input type="date" name="date_from" value="{{ this_month_start|date:'Y-m-d' }}" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold">{% trans "End Date" %}</label>
+            <input type="date" name="date_to" value="{{ today|date:'Y-m-d' }}" class="form-control">
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">{% trans "Transaction Scope" %}</label>
+            <select name="type" class="form-select">
+              <option value="all">{% trans "All Inflows & Outflows (Comprehensive)" %}</option>
+              <option value="income">{% trans "Income Only" %}</option>
+              <option value="expense">{% trans "Expenses Only" %}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-4">
+            <button type="button" class="btn btn-danger w-100 fw-semibold" onclick="submitExport('{% url 'export_pdf' %}')">
+              <i class="bi bi-file-earmark-pdf me-1"></i> {% trans "Download PDF" %}
+            </button>
+          </div>
+          <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100 fw-semibold" onclick="submitExport('{% url 'export_excel' %}')">
+              <i class="bi bi-file-earmark-excel me-1"></i> {% trans "Download Excel" %}
+            </button>
+          </div>
+          <div class="col-md-4">
+            <button type="button" class="btn btn-outline-secondary w-100 fw-semibold" onclick="submitExport('{% url 'export_csv' %}')">
+              <i class="bi bi-file-earmark-spreadsheet me-1"></i> {% trans "Download CSV" %}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Info & Instructions -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm p-4 h-100">
+      <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>{% trans "Export Details" %}</h5>
+      <ul class="small text-muted mb-4 ps-3">
+        <li class="mb-2"><strong>{% trans "PDF Reports:" %}</strong> {% trans "Formatted official financial statement with summaries, color-coded tables, and signature area." %}</li>
+        <li class="mb-2"><strong>{% trans "Excel Spreadsheets:" %}</strong> {% trans "Styled multi-sheet workbook with automatic column auto-fitting and formula sums." %}</li>
+        <li class="mb-2"><strong>{% trans "CSV Files:" %}</strong> {% trans "UTF-8 encoded with BOM support, fully compatible with Microsoft Excel and third-party accounting packages." %}</li>
+      </ul>
+
+      <div class="card bg-light border-0 p-3 mt-auto">
+        <h6 class="fw-bold mb-1"><i class="bi bi-cloud-arrow-up text-primary me-1"></i> {% trans "Batch CSV Import" %}</h6>
+        <p class="small text-muted mb-2">{% trans "Have historical bank or mobile money transactions? Import them effortlessly." %}</p>
+        <a href="{% url 'reports_import' %}" class="btn btn-sm btn-primary">{% trans "Go to CSV Import Tool" %}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitExport(url) {
+  const form = document.getElementById('exportForm');
+  form.action = url;
+  form.submit();
+}
+</script>
+{% endblock %}

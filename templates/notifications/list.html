@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Notifications" %}{% endblock %}
+{% block page_title %}{% trans "System & Financial Notifications" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Notifications & Alerts" %}</h4>
+    <p class="text-muted small mb-0">{% trans "System alerts, budget threshold warnings, and goal milestones" %}</p>
+  </div>
+  {% if notifications %}
+  <form method="post" action="{% url 'notification_mark_all_read' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="bi bi-check2-all me-1"></i> {% trans "Mark All as Read" %}</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card shadow-sm">
+  <div class="list-group list-group-flush">
+    {% for n in notifications %}
+    <div class="list-group-item p-3 {% if not n.is_read %}bg-light bg-opacity-75 border-start border-3 border-{{ n.badge_class }}{% endif %}">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center bg-{{ n.badge_class }} bg-opacity-10 text-{{ n.badge_class }}" style="width: 40px; height: 40px; font-size: 18px;">
+            <i class="bi {{ n.icon }}"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1 {% if not n.is_read %}text-dark{% else %}text-muted{% endif %}">{{ n.title }}</h6>
+            <p class="small mb-1 text-muted">{{ n.message }}</p>
+            <small class="text-muted">{{ n.created_at|timesince }} {% trans "ago" %}</small>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          {% if not n.is_read %}
+          <form method="post" action="{% url 'notification_read' n.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-success" title="{% trans "Mark Read" %}"><i class="bi bi-check"></i></button>
+          </form>
+          {% endif %}
+          <form method="post" action="{% url 'notification_delete' n.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans "Delete" %}"><i class="bi bi-x"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="p-5 text-center text-muted">
+      <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+      <h5>{% trans "No Notifications" %}</h5>
+      <p class="small text-muted mb-0">{% trans "You're all caught up! There are no notifications or alerts at this time." %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ action }} {% trans "Account" %}{% endblock %}
+{% block page_title %}{{ action }} {% trans "Account" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-wallet2 me-2 text-success"></i>{{ action }} {% trans "Account" %}</h6>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">{% trans field.label %}</label>
+            {{ field }}
+            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+            {% if field.help_text %}<div class="form-text">{% trans field.help_text %}</div>{% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-flex gap-2 justify-content-end">
+            <a href="{% url 'account_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle me-2"></i>{% trans "Save Account" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

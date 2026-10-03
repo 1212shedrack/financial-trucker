@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Preview Import" %}{% endblock %}
+{% block page_title %}{% trans "Import Validation & Preview" %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+  <div class="col-lg-10">
+    <div class="card shadow-sm p-4">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h5 class="fw-bold mb-0">{% trans "Validation & Preview Results" %}</h5>
+          <p class="text-muted small mb-0">
+            <span class="text-success fw-semibold">{{ clean_rows|length }}</span> {% trans "new records to import" %},
+            {% if duplicate_rows %}
+              <span class="text-warning fw-semibold">{{ duplicate_rows|length }}</span> {% trans "duplicates to skip" %},
+            {% endif %}
+            <span class="text-danger fw-semibold">{{ invalid_rows|length }}</span> {% trans "errors" %}
+          </p>
+        </div>
+        <a href="{% url 'reports_import' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> {% trans "Re-upload" %}
+        </a>
+      </div>
+
+      <!-- Validation Errors -->
+      {% if errors %}
+      <div class="alert alert-danger mb-4">
+        <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-1"></i> {% trans "Validation Warnings" %}:</h6>
+        <ul class="mb-0 small">
+          {% for err in errors|slice:":10" %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Duplicate Warning Banner -->
+      {% if duplicate_rows %}
+      <div class="alert alert-warning mb-4 d-flex align-items-start gap-3">
+        <i class="bi bi-exclamation-circle-fill fs-4 text-warning flex-shrink-0 mt-1"></i>
+        <div>
+          <h6 class="fw-bold mb-1">{% trans "Duplicate Records Detected" %}</h6>
+          <p class="small mb-2">
+            {% trans "The following" %} <strong>{{ duplicate_rows|length }}</strong>
+            {% trans "row(s) already exist in your database (same date, amount, and description). They will be" %}
+            <span class="text-danger fw-bold">{% trans "automatically skipped" %}</span>
+            {% trans "and will NOT be imported." %}
+          </p>
+          <!-- Duplicate rows table -->
+          <div class="table-responsive" style="max-height:220px; overflow-y:auto;">
+            <table class="table table-sm table-bordered align-middle mb-0 small">
+              <thead class="table-warning">
+                <tr>
+                  <th>{% trans "Date" %}</th>
+                  <th>{% trans "Type" %}</th>
+                  <th>{% trans "Description" %}</th>
+                  <th class="text-end">{% trans "Amount" %}</th>
+                  <th>{% trans "Status" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in duplicate_rows %}
+                <tr class="table-warning text-muted">
+                  <td>{{ r.date }}</td>
+                  <td><span class="badge {% if r.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">{{ r.type|capfirst }}</span></td>
+                  <td>{{ r.description }}</td>
+                  <td class="text-end fw-bold">TSh {{ r.amount }}</td>
+                  <td><span class="badge bg-warning text-dark"><i class="bi bi-skip-forward me-1"></i>{% trans "Duplicate – Skip" %}</span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Clean rows ready to import -->
+      {% if clean_rows %}
+      <h6 class="fw-bold mb-3 text-success">
+        <i class="bi bi-check-circle me-1"></i>
+        {% trans "Ready for Import" %} ({{ clean_rows|length }} {% trans "records" %})
+      </h6>
+      <div class="table-responsive mb-4" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-sm table-hover align-middle mb-0 small">
+          <thead class="table-light sticky-top">
+            <tr>
+              <th>{% trans "Date" %}</th>
+              <th>{% trans "Type" %}</th>
+              <th>{% trans "Description" %}</th>
+              <th>{% trans "Category" %}</th>
+              <th>{% trans "Payment" %}</th>
+              <th class="text-end">{% trans "Amount" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in clean_rows %}
+            <tr>
+              <td>{{ r.date }}</td>
+              <td><span class="badge {% if r.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">{{ r.type|capfirst }}</span></td>
+              <td>{{ r.description }}</td>
+              <td>{{ r.category|default:"—" }}</td>
+              <td>{{ r.payment_method }}</td>
+              <td class="text-end fw-bold {% if r.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                {% if r.type == 'expense' %}-{% endif %}TSh {{ r.amount }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <form method="post" action="{% url 'reports_import_confirm' %}">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+          <a href="{% url 'reports_import' %}" class="btn btn-outline-secondary">
+            {% trans "Discard & Start Over" %}
+          </a>
+          <button type="submit" class="btn btn-success fw-semibold px-4">
+            <i class="bi bi-check2-circle me-1"></i>
+            {% trans "Confirm & Import" %} {{ clean_rows|length }} {% trans "Transactions" %}
+            {% if duplicate_rows %}
+              <span class="badge bg-warning text-dark ms-1">{{ duplicate_rows|length }} {% trans "skip" %}</span>
+            {% endif %}
+          </button>
+        </div>
+      </form>
+
+      {% elif not invalid_rows %}
+      <!-- No valid rows and no errors — file was completely empty or all duplicates -->
+      <div class="text-center py-5 text-muted">
+        {% if duplicate_rows %}
+          <i class="bi bi-check2-all fs-1 text-warning"></i>
+          <p class="mt-3 fw-semibold">{% trans "All rows in this file already exist in your database." %}</p>
+          <p class="small">{% trans "Nothing new to import. All records were detected as duplicates." %}</p>
+        {% else %}
+          <i class="bi bi-file-earmark-x fs-1"></i>
+          <p class="mt-3">{% trans "No valid rows could be parsed from your file. Please check the CSV format and try again." %}</p>
+        {% endif %}
+        <a href="{% url 'reports_import' %}" class="btn btn-primary mt-2">{% trans "Try Again" %}</a>
+      </div>
+
+      {% else %}
+      <div class="text-center py-4 text-muted">
+        <p>{% trans "No valid rows could be parsed from your file. Please check the CSV format and try again." %}</p>
+        <a href="{% url 'reports_import' %}" class="btn btn-primary">{% trans "Try Again" %}</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

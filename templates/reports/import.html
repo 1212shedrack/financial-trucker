@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Transactions{% endblock %}
+{% block page_title %}Import Data{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Import Transactions via CSV</h5>
+        <a href="{% url 'reports_dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back</a>
+      </div>
+
+      <p class="text-muted small mb-4">
+        Upload a CSV file containing your historical income and expense transactions. The system will preview and validate the data before saving.
+      </p>
+
+      <div class="card bg-light p-3 border-0 mb-4">
+        <h6 class="fw-bold small mb-2"><i class="bi bi-info-circle me-1"></i> CSV Requirements &amp; Format:</h6>
+        <p class="small text-muted mb-2">The CSV file must contain a header row with these column names:</p>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered bg-white small mb-2">
+            <thead>
+              <tr class="table-secondary">
+                <th>date</th>
+                <th>type</th>
+                <th>description</th>
+                <th>amount</th>
+                <th>category</th>
+                <th>payment_method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026-08-20</td>
+                <td>income</td>
+                <td>Consulting Fee</td>
+                <td>450000</td>
+                <td>Freelance</td>
+                <td>mpesa</td>
+              </tr>
+              <tr>
+                <td>2026-08-21</td>
+                <td>expense</td>
+                <td>Supermarket</td>
+                <td>65000</td>
+                <td>Food &amp; Dining</td>
+                <td>cash</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <small class="text-muted"><code>type</code> must be either <code>income</code> or <code>expense</code>. Dates must be formatted as <code>YYYY-MM-DD</code>.</small>
+      </div>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label class="form-label small fw-semibold">Select CSV File *</label>
+          <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'reports_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary fw-semibold px-4"><i class="bi bi-eye me-1"></i> Upload &amp; Preview</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Recurring Transactions" %}{% endblock %}
+{% block page_title %}{% trans "Recurring Transactions" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Scheduled & Recurring Transactions" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Automate and track repeating salaries, subscriptions, rent, and bills" %}</p>
+  </div>
+  <a href="{% url 'recurring_create' %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> {% trans "Add Recurring" %}</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>{% trans "Title" %}</th>
+          <th>{% trans "Type" %}</th>
+          <th>{% trans "Frequency" %}</th>
+          <th>{% trans "Next Due Date" %}</th>
+          <th>{% trans "Category" %}</th>
+          <th>{% trans "Amount" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="text-end">{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in recurring_list %}
+        <tr>
+          <td class="fw-semibold">{{ item.title }}</td>
+          <td>
+            <span class="type-pill {% if item.transaction_type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
+              {{ item.get_transaction_type_display }}
+            </span>
+          </td>
+          <td><span class="badge bg-light text-dark border">{{ item.get_frequency_display }}</span></td>
+          <td>
+            <div class="fw-semibold">{{ item.next_due_date|date:"M d, Y" }}</div>
+            {% if item.end_date %}<small class="text-muted">{% trans "Ends" %}: {{ item.end_date|date:"Y-m-d" }}</small>{% endif %}
+          </td>
+          <td>
+            {% if item.category %}
+              <span class="badge bg-light text-dark border"><i class="bi {{ item.category.icon }} me-1" style="color: {{ item.category.color }};"></i>{{ item.category.name }}</span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td class="fw-bold {% if item.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+            {{ item.amount|currency }}
+          </td>
+          <td>
+            {% if item.active %}
+              <span class="badge bg-success bg-opacity-10 text-success">{% trans "Active" %}</span>
+            {% else %}
+              <span class="badge bg-secondary bg-opacity-10 text-secondary">{% trans "Paused" %}</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <form method="post" action="{% url 'recurring_toggle' item.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-secondary" title="{% trans "Toggle active" %}">
+                <i class="bi {% if item.active %}bi-pause{% else %}bi-play{% endif %}"></i>
+              </button>
+            </form>
+            <a href="{% url 'recurring_edit' item.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <form method="post" action="{% url 'recurring_delete' item.pk %}" class="d-inline" onsubmit="return confirm('{% trans "Delete this recurring schedule?" %}');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="bi bi-calendar-repeat fs-1 d-block mb-2 text-secondary"></i>
+            {% trans "No recurring schedules created." %} <a href="{% url 'recurring_create' %}" class="text-success">{% trans "Create your first schedule" %}</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

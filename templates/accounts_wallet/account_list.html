@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+{% block title %}{% trans "My Wallets & Accounts" %}{% endblock %}
+{% block page_title %}{% trans "Wallets & Accounts" %}{% endblock %}
+
+{% block content %}
+<!-- Summary Row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card wallet-summary-card text-white">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-wallet2 fs-2 opacity-75"></i>
+        <div>
+          <div class="small opacity-75">{% trans "Total Balance" %}</div>
+          <div class="fs-5 fw-bold">{{ total_balance|currency }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-body-tertiary">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-credit-card-2-front fs-2 text-primary"></i>
+        <div>
+          <div class="small text-muted">{% trans "Active Accounts" %}</div>
+          <div class="fs-5 fw-bold">{{ accounts|length }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="d-flex gap-2 align-items-center h-100">
+      <a href="{% url 'account_create' %}" class="btn btn-success w-100">
+        <i class="bi bi-plus-circle me-2"></i>{% trans "Add Account" %}
+      </a>
+      <a href="{% url 'transfer_create' %}" class="btn btn-outline-primary w-100">
+        <i class="bi bi-arrow-left-right me-2"></i>{% trans "Transfer" %}
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Accounts Grid -->
+{% if accounts %}
+<div class="row g-3 mb-4">
+  {% for account in accounts %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100 shadow-sm" style="border-top: 4px solid {{ account.color }};">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-white"
+                 style="width:40px;height:40px;background:{{ account.color }};">
+              <i class="bi {{ account.icon }}"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-body">{{ account.name }}</div>
+                <div class="badge bg-light text-body">{{ account.get_account_type_display }}</div>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'account_edit' account.pk %}"><i class="bi bi-pencil me-2"></i>{% trans "Edit" %}</a></li>
+              <li>
+                <form method="post" action="{% url 'account_delete' account.pk %}" class="d-inline"
+                      onsubmit="return confirm('{% trans "Deactivate this account?" %}');">
+                  {% csrf_token %}
+                  <button class="dropdown-item text-danger"><i class="bi bi-archive me-2"></i>{% trans "Deactivate" %}</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="small text-muted">{% trans "Current Balance" %}</div>
+          <div class="fs-4 fw-bold">{{ account.current_balance|currency }}</div>
+          {% if account.account_number %}
+          <div class="small text-muted mt-1">••••{{ account.account_number }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-wallet2 display-3 mb-3 d-block opacity-25"></i>
+  <h5>{% trans "No accounts yet" %}</h5>
+  <p class="small mb-4">{% trans "Add your cash, bank, or mobile money accounts to track your balances." %}</p>
+  <a href="{% url 'account_create' %}" class="btn btn-success">
+    <i class="bi bi-plus-circle me-2"></i>{% trans "Add First Account" %}
+  </a>
+</div>
+{% endif %}
+
+{% if inactive_accounts %}
+<div class="card mt-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-archive me-2 text-secondary"></i>{% trans "Inactive Accounts" %}</h6>
+    <span class="badge text-bg-secondary">{{ inactive_accounts|length }}</span>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% for account in inactive_accounts %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-secondary-subtle bg-body-tertiary">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-semibold text-muted">{{ account.name }}</div>
+              <span class="badge text-bg-secondary">{% trans "Inactive" %}</span>
+            </div>
+            <div class="small text-muted">{{ account.get_account_type_display }}</div>
+            <div class="mt-3">
+              <div class="small text-muted">{% trans "Balance" %}</div>
+              <div class="fw-bold text-muted">{{ account.current_balance|currency }}</div>
+            </div>
+            <form method="post" action="{% url 'account_activate' account.pk %}" class="mt-3">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-success w-100">
+                <i class="bi bi-toggle-on me-2"></i>{% trans "Activate" %}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Transfers -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-arrow-left-right me-2 text-primary"></i>{% trans "Recent Transfers" %}</h6>
+    <a href="{% url 'transfer_list' %}" class="btn btn-sm btn-outline-primary">{% trans "View All" %}</a>
+  </div>
+</div>
+{% endblock %}

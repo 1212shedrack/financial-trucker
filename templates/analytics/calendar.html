@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+{% block title %}{% trans "Financial Calendar" %}{% endblock %}
+{% block page_title %}{% trans "Financial Calendar" %}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>{% trans "Upcoming Financial Commitments (Next 90 Days)" %}</h6>
+    <span class="badge bg-light text-primary fw-bold">{{ events|length }} {% trans "Upcoming Events" %}</span>
+  </div>
+  <div class="card-body p-0">
+    {% if events %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Event / Description" %}</th>
+            <th>{% trans "Category" %}</th>
+            <th class="text-end">{% trans "Amount" %}</th>
+            <th class="text-center">{% trans "Status / Type" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr>
+            <td class="fw-semibold text-nowrap">
+              <i class="bi {{ event.icon }} me-2 text-primary"></i>{{ event.date }}
+            </td>
+            <td class="fw-semibold">{{ event.title }}</td>
+            <td><span class="badge bg-light text-dark">{{ event.category }}</span></td>
+            <td class="text-end fw-bold">TSh {{ event.amount|floatformat:0 }}</td>
+            <td class="text-center">
+              <span class="badge bg-{{ event.badge_class }} text-uppercase">{{ event.type }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-check display-3 d-block opacity-25 mb-3"></i>
+      <h5>{% trans "No upcoming bill payments or deadlines" %}</h5>
+      <p class="small">{% trans "Add recurring transactions, debt payment schedules, or goal deadlines to view them on your financial calendar." %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

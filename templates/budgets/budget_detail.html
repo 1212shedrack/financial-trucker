@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Budget" %}: {{ budget.category.name }}{% endblock %}
+{% block page_title %}{% trans "Budget Details" %}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm p-4 text-center">
+      <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px; background-color: {{ budget.category.color }}20; color: {{ budget.category.color }}; font-size: 28px;">
+        <i class="bi {{ budget.category.icon }}"></i>
+      </div>
+      <h4 class="fw-bold mb-1">{{ budget.category.name }}</h4>
+      <p class="text-muted small mb-3">{{ budget.get_period_display }} {% trans "Budget" %}</p>
+
+      <div class="p-3 bg-light rounded-3 mb-3 text-start">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">{% trans "Budget Limit" %}:</span>
+          <strong class="text-dark">{{ budget.amount|currency }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted small">{% trans "Total Spent" %}:</span>
+          <strong class="text-danger">{{ budget.spent_amount|currency }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2 border-top pt-2">
+          <span class="text-muted small">{% trans "Remaining" %}:</span>
+          <strong class="{% if budget.remaining_amount >= 0 %}text-success{% else %}text-danger{% endif %}">{{ budget.remaining_amount|currency }}</strong>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+          <span>{% trans "Utilization" %}</span>
+          <strong>{{ budget.percentage_used }}%</strong>
+        </div>
+        <div class="progress" style="height: 12px;">
+          <div class="progress-bar bg-{{ budget.status_class }}" style="width: {{ budget.percentage_used }}%;"></div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-center mt-3">
+        <a href="{% url 'budget_edit' budget.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil me-1"></i> {% trans "Edit" %}</a>
+        <a href="{% url 'budget_list' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm p-4">
+      <h5 class="fw-bold mb-3">{% trans "Recent Expenses in this Category" %}</h5>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{% trans "Date" %}</th>
+              <th>{% trans "Description" %}</th>
+              <th>{% trans "Payment" %}</th>
+              <th class="text-end">{% trans "Amount" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for exp in recent_expenses %}
+            <tr>
+              <td><small class="text-muted">{{ exp.date|date:"Y-m-d" }}</small></td>
+              <td class="fw-semibold"><a href="{% url 'expense_detail' exp.pk %}" class="text-decoration-none text-dark">{{ exp.description }}</a></td>
+              <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ exp.get_payment_method_display }}</span></td>
+              <td class="text-end fw-bold text-danger">-{{ exp.amount|currency }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center py-4 text-muted small">{% trans "No expenses logged for this category in the current period." %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

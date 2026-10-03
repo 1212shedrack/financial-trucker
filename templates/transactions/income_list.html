@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+
+{% block title %}{% trans "Income" %}{% endblock %}
+{% block page_title %}{% trans "Income Management" %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="fw-bold mb-1">{% trans "Income Records" %}</h4>
+    <p class="text-muted small mb-0">{% trans "Total Tracked" %}: <strong class="text-success">{{ total_income|currency }}</strong></p>
+  </div>
+  <a href="{% url 'income_create' %}" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i> {% trans "Add Income" %}</a>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm p-3 mb-4">
+  <form method="get" class="row g-2 align-items-end auto-filter-form">
+    <div class="col-md-3">
+      <label class="form-label small text-muted mb-1">{% trans "Search" %}</label>
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="{% trans 'Source or description...' %}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small text-muted mb-1">{% trans "Category" %}</label>
+      {{ filter_form.category }}
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small text-muted mb-1">{% trans "Payment" %}</label>
+      {{ filter_form.payment_method }}
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small text-muted mb-1">{% trans "From Date" %}</label>
+      <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small text-muted mb-1">{% trans "To Date" %}</label>
+      <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-1 d-flex gap-1">
+      <a href="{% url 'income_list' %}" class="btn btn-sm btn-outline-secondary" title="{% trans 'Reset filters' %}" aria-label="{% trans 'Reset filters' %}"><i class="bi bi-x"></i></a>
+    </div>
+  </form>
+</div>
+
+<!-- Table -->
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>{% trans "Date" %}</th>
+          <th>{% trans "Source" %}</th>
+          <th>{% trans "Category" %}</th>
+          <th>{% trans "Payment Method" %}</th>
+          <th class="text-end">{% trans "Amount" %}</th>
+          <th class="text-center">{% trans "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for income in page_obj %}
+        <tr>
+          <td><small class="text-muted">{{ income.date|date:"Y-m-d" }}</small></td>
+          <td class="fw-semibold">
+            <a href="{% url 'income_detail' income.pk %}" class="text-decoration-none text-dark">{{ income.source }}</a>
+            {% if income.description %}
+              <div class="text-muted small text-truncate" style="max-width: 250px;">{{ income.description }}</div>
+            {% endif %}
+          </td>
+          <td>
+            {% if income.category %}
+              <span class="badge bg-light text-dark border">
+                <i class="bi {{ income.category.icon }} me-1" style="color: {{ income.category.color }};"></i>{{ income.category.name }}
+              </span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ income.get_payment_method_display }}</span></td>
+          <td class="text-end fw-bold text-success">{{ income.amount|currency }}</td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <a href="{% url 'income_edit' income.pk %}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'income_delete' income.pk %}" class="btn btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+            {% trans "No income records found." %} <a href="{% url 'income_create' %}" class="text-success">{% trans "Add your first income" %}</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer bg-transparent py-3">
+    <nav>
+      <ul class="pagination pagination-sm justify-content-center mb-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">&laquo;</a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if filter_query %}&{{ filter_query }}{% endif %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">&raquo;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

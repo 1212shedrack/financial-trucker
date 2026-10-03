@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load finance_tags i18n %}
+{% block title %}{{ debt.name }}{% endblock %}
+{% block page_title %}{{ debt.get_debt_type_display }}: {{ debt.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Left: Debt Info -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>{% trans "Details" %}</h6>
+        <div class="d-flex gap-1">
+          <a href="{% url 'debt_edit' debt.pk %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <form method="post" action="{% url 'debt_delete' debt.pk %}"
+                onsubmit="return confirm('{% trans "Delete this debt permanently?" %}');">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Progress -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small mb-1">
+            <span>{% trans "Repaid" %}</span>
+            <span class="fw-semibold">{{ debt.percentage_paid }}%</span>
+          </div>
+          <div class="progress" style="height:12px;">
+            <div class="progress-bar bg-success" style="width:{{ debt.percentage_paid }}%;"></div>
+          </div>
+        </div>
+        <div class="row g-2 text-center">
+          <div class="col-4">
+            <div class="small text-muted">{% trans "Principal" %}</div>
+            <div class="fw-bold">{{ debt.principal_amount|currency }}</div>
+          </div>
+          <div class="col-4">
+            <div class="small text-muted">{% trans "Paid" %}</div>
+            <div class="fw-bold text-success">{{ debt.total_paid|currency }}</div>
+          </div>
+          <div class="col-4">
+            <div class="small text-muted">{% trans "Remaining" %}</div>
+            <div class="fw-bold text-danger" id="remaining-balance-display">{{ debt.remaining_balance|currency }}</div>
+          </div>
+        </div>
+        <hr>
+        <div class="small">
+          {% if debt.interest_rate > 0 %}
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">{% trans "Interest Rate" %}</span>
+            <strong>{{ debt.interest_rate }}% p.a.</strong>
+          </div>
+          {% endif %}
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">{% trans "Start Date" %}</span>
+            <strong>{{ debt.start_date|date:"d M Y" }}</strong>
+          </div>
+          {% if debt.due_date %}
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">{% trans "Due Date" %}</span>
+            <strong class="{% if debt.is_overdue %}text-danger{% endif %}">
+              {{ debt.due_date|date:"d M Y" }}
+              {% if debt.is_overdue %}<span class="badge bg-danger ms-1">{% trans "Overdue" %}</span>{% endif %}
+            </strong>
+          </div>
+          {% endif %}
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">{% trans "Status" %}</span>
+            <span class="badge bg-{% if debt.status == 'paid' %}success{% elif debt.status == 'overdue' %}danger{% elif debt.status == 'partial' %}warning{% else %}secondary{% endif %}">
+              {{ debt.get_status_display }}
+            </span>
+          </div>
+        </div>
+        {% if debt.notes %}
+        <hr>
+        <div class="small text-muted">{{ debt.notes }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Record Payment -->
+    {% if debt.remaining_balance > 0 %}
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-cash-coin me-2 text-success"></i>{% trans "Record Payment" %}</h6>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url 'debt_repay' debt.pk %}" novalidate
+              id="repayment-form"
+              data-check-url="{% url 'debt_repay_check' debt.pk %}"
+              data-remaining="{{ debt.remaining_balance }}"
+              data-csrf="{% csrf_token %}">
+          {% csrf_token %}
+          <!-- Hidden flag: set to 1 by JS when user confirms overpayment -->
+          <input type="hidden" name="confirm_overpayment" id="confirm-overpayment-flag" value="0">
+          {% for field in repayment_form %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">{% trans field.label %}</label>
+            {{ field }}
+            {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-success w-100" id="repay-submit-btn">
+            <i class="bi bi-check-circle me-2"></i>{% trans "Record Payment" %}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right: Payment History -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>{% trans "Payment History" %}</h6>
+      </div>
+      <div class="card-body p-0">
+        {% if repayments %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr><th>{% trans "Date" %}</th><th>{% trans "Amount" %}</th><th>{% trans "Method" %}</th><th>{% trans "Notes" %}</th></tr>
+            </thead>
+            <tbody>
+              {% for r in repayments %}
+              <tr>
+                <td>{{ r.date|date:"d M Y" }}</td>
+                <td class="fw-semibold text-success">{{ r.amount|currency }}</td>
+                <td><span class="badge bg-light text-dark">{{ r.payment_method }}</span></td>
+                <td class="text-muted small">{{ r.notes|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-clock-history display-4 opacity-25 d-block mb-2"></i>
+          <p class="small mb-0">{% trans "No payments recorded yet." %}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overpayment Confirmation Modal -->
+<div class="modal fade" id="overpaymentModal" tabindex="-1"
+     aria-labelledby="overpaymentModalLabel" aria-hidden="true"
+     role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="overpaymentModalLabel">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+          {% trans "Overpayment Detected" %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="{% trans 'Cancel' %}"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning d-flex gap-2 align-items-start mb-3 py-2">
+          <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+          <div class="small">{% trans "Your payment exceeds the outstanding balance." %}</div>
+        </div>
+        <table class="table table-sm mb-0">
+          <tbody>
+            <tr>
+              <td class="text-muted">{% trans "Amount Due" %}</td>
+              <td class="fw-semibold text-end" id="modal-remaining">—</td>
+            </tr>
+            <tr>
+              <td class="text-muted">{% trans "You Entered" %}</td>
+              <td class="fw-semibold text-end" id="modal-entered">—</td>
+            </tr>
+            <tr class="table-warning">
+              <td class="text-muted fw-semibold">{% trans "Overpayment" %}</td>
+              <td class="fw-bold text-end text-warning" id="modal-overpayment">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="small text-muted mt-3 mb-0">
+          {% trans "Do you want to proceed with this payment? The full amount you entered will be recorded." %}
+        </p>
+      </div>
+      <div class="modal-footer border-0 pt-0 gap-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="cancel-overpayment-btn">
+          <i class="bi bi-x-circle me-1"></i>{% trans "Cancel" %}
+        </button>
+        <button type="button" class="btn btn-warning fw-semibold" id="confirm-overpayment-btn">
+          <i class="bi bi-check-circle me-1"></i>{% trans "Confirm Payment" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  const form = document.getElementById('repayment-form');
+  if (!form) return;  // debt already paid — form not rendered
+
+  const checkUrl   = form.dataset.checkUrl;
+  const csrfToken  = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const flagInput  = document.getElementById('confirm-overpayment-flag');
+  const submitBtn  = document.getElementById('repay-submit-btn');
+  const modal      = new bootstrap.Modal(document.getElementById('overpaymentModal'));
+  const confirmBtn = document.getElementById('confirm-overpayment-btn');
+  const cancelBtn  = document.getElementById('cancel-overpayment-btn');
+
+  // ── Number formatter (TZS, no decimals for display) ──────────────────────
+  function fmtTZS(amount) {
+    const n = parseFloat(amount);
+    if (isNaN(n)) return 'TZS 0';
+    return 'TZS ' + n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
+  // ── Handle form submit ────────────────────────────────────────────────────
+  form.addEventListener('submit', async function (e) {
+    // If user already confirmed overpayment (flag set) — let form submit normally
+    if (flagInput.value === '1') return;
+
+    const amountInput = form.querySelector('[name="amount"]');
+    const amount = amountInput ? amountInput.value.trim() : '';
+    if (!amount || parseFloat(amount) <= 0) {
+      // Let form's own validation handle empty/zero — don't intercept
+      return;
+    }
+
+    e.preventDefault();
+
+    // Disable button to prevent double-click
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Checking..." %}';
+
+    try {
+      const fd = new FormData(form);
+      const resp = await fetch(checkUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body: fd,
+      });
+
+      const data = await resp.json();
+
+      if (resp.ok && data.is_overpayment) {
+        // Populate modal
+        document.getElementById('modal-remaining').textContent    = fmtTZS(data.remaining_balance);
+        document.getElementById('modal-entered').textContent      = fmtTZS(data.payment_amount);
+        document.getElementById('modal-overpayment').textContent  = fmtTZS(data.overpayment_amount);
+
+        // Show modal
+        modal.show();
+      } else if (resp.ok && !data.is_overpayment) {
+        // Normal payment — submit the form directly
+        form.submit();
+      } else {
+        // Server returned an error message — show it and re-enable button
+        const msg = data.error || '{% trans "An error occurred. Please try again." %}';
+        alert(msg);
+        _resetBtn();
+      }
+    } catch (err) {
+      console.error('Overpayment check error:', err);
+      alert('{% trans "Network error. Please try again." %}');
+      _resetBtn();
+    }
+  });
+
+  // ── Confirm button: set flag and submit ───────────────────────────────────
+  confirmBtn.addEventListener('click', function () {
+    flagInput.value = '1';
+    modal.hide();
+    form.submit();
+  });
+
+  // ── Cancel button: reset flag and re-enable submit ────────────────────────
+  cancelBtn.addEventListener('click', function () {
+    flagInput.value = '0';
+    _resetBtn();
+  });
+
+  // Also reset on modal close (backdrop click / × button)
+  document.getElementById('overpaymentModal').addEventListener('hidden.bs.modal', function () {
+    if (flagInput.value !== '1') {
+      flagInput.value = '0';
+      _resetBtn();
+    }
+  });
+
+  function _resetBtn() {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>{% trans "Record Payment" %}';
+  }
+})();
+</script>
+{% endblock %}

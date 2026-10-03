@@ -1,0 +1,127 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (() => {
+      const theme = localStorage.getItem('pfams_theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+  <meta name="description" content="PFAMS — Personal Financial Analytics and Management System">
+  <meta name="theme-color" content="#198754">
+  <title>{% block title %}PFAMS{% endblock %} Personal Finance</title>
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <link rel="icon" type="image/png" href="{% static 'icons/icon-192.png' %}">
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap-icons/font/bootstrap-icons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  <style>
+    /* Public auth layout — no sidebar offset */
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      background: var(--bs-body-bg, #fff);
+      border-bottom: 1px solid var(--bs-border-color, rgba(0,0,0,.1));
+      padding: 0.625rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .auth-brand {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #198754;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .auth-brand:hover { color: #157347; }
+    .auth-main {
+      flex: 1;
+      padding: 1rem 0;
+    }
+    .auth-footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.78rem;
+      color: var(--bs-secondary-color, #6c757d);
+      border-top: 1px solid var(--bs-border-color, rgba(0,0,0,.08));
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Public Top Bar -->
+<header class="auth-topbar">
+  <a href="{% url 'landing' %}" class="auth-brand">
+    <i class="bi bi-wallet2"></i> PFAMS
+  </a>
+  <div class="d-flex align-items-center gap-2">
+    <!-- Theme Toggle -->
+    <button class="btn btn-sm btn-light rounded-circle theme-toggle" id="themeToggle"
+            title="{% trans 'Toggle dark mode' %}" aria-label="{% trans 'Toggle dark mode' %}">
+      <i class="bi bi-moon" id="themeIcon"></i>
+    </button>
+    <!-- Auth Links -->
+    {% if request.resolver_match.url_name != 'login' %}
+    <a href="{% url 'login' %}" class="btn btn-sm btn-outline-success">
+      <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Login" %}
+    </a>
+    {% endif %}
+    {% if request.resolver_match.url_name != 'register' %}
+    <a href="{% url 'register' %}" class="btn btn-sm btn-success">
+      <i class="bi bi-person-plus me-1"></i>{% trans "Register" %}
+    </a>
+    {% endif %}
+  </div>
+</header>
+
+<!-- Flash Messages -->
+{% if messages %}
+<div class="container mt-3">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-2" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Main Auth Content -->
+<main class="auth-main">
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="auth-footer">
+  &copy; {% now "Y" %} Personal Financial Analytics &amp; Management System
+</footer>
+
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+<script>
+  // Register Service Worker (for PWA / offline assets)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('{% static "js/service-worker.js" %}')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW registration failed:', err));
+  }
+</script>
+</body>
+</html>
