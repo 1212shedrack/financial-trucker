@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
 
 from decouple import config, Csv
+from django.core.exceptions import ImproperlyConfigured
 
 
 def build_database_config():
@@ -15,8 +16,9 @@ def build_database_config():
     default_engine = 'django.db.backends.sqlite3'
     db_engine = config('DB_ENGINE', default=default_engine)
     database_url = config('DATABASE_URL', default='')
+    is_vercel = config('VERCEL', default=False, cast=bool)
 
-    if db_engine == 'django.db.backends.sqlite3':
+    if db_engine == 'django.db.backends.sqlite3' and not is_vercel:
         return {
             'ENGINE': db_engine,
             'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
@@ -56,6 +58,12 @@ def build_database_config():
             'PORT': str(parsed.port or config('DB_PORT', default='5432')),
             'OPTIONS': {'sslmode': ssl_mode},
         }
+
+    if is_vercel:
+        raise ImproperlyConfigured(
+            'DATABASE_URL must be set on Vercel; SQLite is not supported '
+            'for persistent production data.'
+        )
 
     return {
         'ENGINE': db_engine,
