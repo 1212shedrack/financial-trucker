@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -105,6 +106,14 @@ class ProfileView(View):
         if form.is_valid():
             try:
                 form.save()
+            except ImproperlyConfigured:
+                logger.exception('Profile photo storage is not configured')
+                form.add_error(
+                    None,
+                    'Profile photo storage is not configured on the server. '
+                    'Please contact the site administrator.',
+                )
+                return render(request, self.template_name, {'form': form})
             except Exception:
                 logger.exception('Failed to save profile update or photo')
                 form.add_error(

@@ -133,6 +133,30 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Profile could not be saved.')
 
+    def test_unconfigured_profile_storage_shows_actionable_error(self):
+        from django.core.exceptions import ImproperlyConfigured
+
+        self.client.login(username='viewuser', password='viewpassword123')
+        profile_data = {
+            'full_name': 'View User',
+            'phone_number': '',
+            'preferred_currency': 'TZS',
+            'timezone': 'Africa/Dar_es_Salaam',
+            'monthly_income_target': '0',
+            'monthly_savings_target': '0',
+        }
+
+        with patch(
+            'accounts.views.UserProfileForm.save',
+            side_effect=ImproperlyConfigured(
+                'Configure Supabase Storage before saving uploads.'
+            ),
+        ):
+            response = self.client.post(reverse('profile'), profile_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Profile photo storage is not configured')
+
     def test_income_storage_failure_returns_form_error(self):
         self.client.login(username='viewuser', password='viewpassword123')
         income_data = {
