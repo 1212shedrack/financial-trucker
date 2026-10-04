@@ -4,6 +4,8 @@ from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
+from django.http import FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.db.models import Sum
@@ -36,6 +38,17 @@ def landing_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     return render(request, 'core/landing.html')
+
+
+def service_worker_view(request):
+    worker_path = settings.BASE_DIR / 'static' / 'js' / 'service-worker.js'
+    response = FileResponse(
+        worker_path.open('rb'),
+        content_type='application/javascript',
+    )
+    response['Service-Worker-Allowed'] = '/'
+    response['Cache-Control'] = 'no-cache'
+    return response
 
 
 def switch_language_view(request):

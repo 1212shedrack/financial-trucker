@@ -23,7 +23,7 @@
   <link href="{% static 'css/style.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body data-user-id="{% if user.is_authenticated %}{{ user.pk }}{% endif %}">
 
 {% if user.is_authenticated %}
 <!-- Sidebar -->
@@ -307,7 +307,7 @@
 <script>
   // Register Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('{% static "js/service-worker.js" %}')
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
       .then(reg => console.log('SW registered:', reg.scope))
       .catch(err => console.warn('SW registration failed:', err));
   }

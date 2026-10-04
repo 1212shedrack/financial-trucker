@@ -1,5 +1,197 @@
 
 ================================================================================
+        PFAMS — CURRENT SYSTEM AUDIT AND TECHNICAL STATUS
+                         Audit date: 2026-10-04
+================================================================================
+
+CURRENT STATUS
+--------------
+Local Django checks: PASS
+Automated tests: 56 passed, 0 failed
+Local landing and registration pages: HTTP 200
+Offline landing-page reload: PASS after service-worker installation
+Mobile landing page at 390px: no horizontal overflow detected
+Supplied production URL: BLOCKED (Vercel DEPLOYMENT_NOT_FOUND)
+Supabase connection: NOT VERIFIED (production deployment unavailable)
+Migration consistency: NEEDS ATTENTION (existing model/migration drift)
+Offline transactions: PARTIAL (new income and expense creation only)
+
+SCOPE AND VERIFICATION EVIDENCE
+-------------------------------
+Reviewed Django settings and deployment entrypoint, all 10 installed local Django
+apps, APIs and sync paths, PWA manifest/service worker/IndexedDB queue, shared and
+transaction templates, migration state, test modules, setup files, and historical
+audit claims. This was a code and local-runtime audit, not a penetration test or a
+manual test of every screen and workflow.
+
+  py manage.py check                         PASS
+  py manage.py test tests --verbosity=1      56 passed
+  node --check static/js/offline.js          PASS
+  node --check static/js/service-worker.js   PASS
+  PWA manifest JSON parse                    PASS
+  Local / and /accounts/register/            HTTP 200
+  Local offline landing reload               HTTP 200 from service worker cache
+  Local service-worker registration          root scope, /service-worker.js
+  https://sheldrakefinancials.vercel.app/    404 DEPLOYMENT_NOT_FOUND
+
+CONFIRMED PROBLEMS AND FIXES
+----------------------------
+1. Vercel previously selected SQLite, whose serverless filesystem is not a durable
+   writable database. Production now selects PostgreSQL from DATABASE_URL when the
+   VERCEL environment flag is set. If the URL is missing, settings raise a clear
+   ImproperlyConfigured error. Local development continues to default to SQLite.
+   This code change does not prove the production environment variables or database
+   connectivity are correct.
+
+2. The service worker was served below /static/js/, limiting control to that path.
+   It is now served at /service-worker.js with Service-Worker-Allowed: / and is
+   registered at root scope. Browser testing confirmed root scope and a cached
+   landing page reload with network access disabled.
+
+3. The IndexedDB queue previously had no callers. New income and expense forms now
+   queue valid create operations while offline. Entries are scoped to the current
+   user, kept in queue order, retried when connectivity returns, and retained after
+   sync failures. Users receive a warning for failed items. Attachments cannot be
+   queued and are explicitly rejected while offline.
+
+4. The sync API previously wrote unvalidated values, returned raw exception text,
+   and could duplicate entries after a lost response. It now uses the existing
+   IncomeForm/ExpenseForm validation, restricts categories to the authenticated
+   user's allowed choices, caps each request at 100 operations, avoids exposing
+   internal exception details, and uses per-user client IDs with payload hashes for
+   idempotent retries. Reusing a client ID with different data is rejected.
+
+5. Successful logout now clears cached private HTML and API responses. The PWA
+   manifest no longer references a dashboard screenshot absent from the repository.
+
+DATABASE AND MIGRATIONS
+-----------------------
+Added core/migrations/0002_offlinesyncreceipt_and_more.py. It creates a new,
+per-user sync receipt table with a unique (user, client_id) constraint. The
+migration was applied to the local SQLite database only; no existing table or
+financial record was deleted or reset.
+
+py manage.py makemigrations --check --dry-run still reports model-state differences
+in accounts_wallet, budgets, debts, goals, and transactions, proposing AlterField
+operations. Those migrations were not generated or applied because they are
+outside this confirmed fix and require schema review before production. Apply the
+new core migration to Supabase through the controlled deployment migration process
+before enabling the updated sync endpoint there.
+
+OFFLINE AVAILABILITY AND LIMITATIONS
+------------------------------------
+Verified or implemented: static shell caching; network-first page/API caching;
+offline landing reload; IndexedDB storage for new income/expense entries; reconnect
+sync; authenticated server validation; idempotent retries; preservation of failed
+entries; visible sync failure feedback.
+
+Not implemented or verified: offline edits/deletes, wallets/accounts/transfers,
+budgets, goals, debts, recurring transactions, receipt uploads, and offline login.
+Only income and expense creation is currently queued. Pending financial entries are
+stored in browser IndexedDB without encryption; do not use this feature on shared
+or untrusted browser profiles. Full authenticated browser-to-Supabase synchronization
+was not tested because the production deployment is unavailable.
+
+PRODUCTION AND MANUAL ACTIONS
+-----------------------------
+The supplied URL https://sheldrakefinancials.vercel.app currently returns the
+Vercel platform response “404 DEPLOYMENT_NOT_FOUND”. This is not a Django route or
+database error. Verify that the domain is assigned to the intended Vercel project
+and production deployment, and that the expected GitHub repository and branch are
+connected. Different GitHub and Vercel project names are not by themselves a
+problem.
+
+Before production sync is enabled:
+  - Set DATABASE_URL in Vercel for the deployed environment to the Supabase
+    PostgreSQL connection string. Never expose service-role credentials in browser
+    code.
+  - Apply the pending core sync-receipt migration to Supabase through the controlled
+    migration process. Do not automatically apply the unreviewed AlterField drift.
+  - Re-test registration, login, transaction creation, and sync on the actual domain.
+
+No package was installed. No Supabase data or remote schema was changed. Vercel
+project/domain configuration could not be changed from this workspace.
+
+IMPORTANT FILE INVENTORY
+------------------------
+Runtime and deployment:
+  manage.py                         Django management-command entrypoint.
+  personal_finance/settings.py     Apps, middleware, environment and database config.
+  personal_finance/urls.py         Root routes, including the root service-worker route.
+  personal_finance/asgi.py         ASGI application entrypoint used by Vercel.
+  personal_finance/wsgi.py         WSGI entrypoint for conventional servers.
+  pyproject.toml                   Python metadata and Vercel ASGI entrypoint.
+  requirements.txt                 Python runtime dependencies, including psycopg2.
+  .env.example                     Local and Supabase environment-variable template.
+  package.json / package-lock.json Prisma tooling; not Django's runtime database layer.
+  prisma/schema.prisma             Prisma schema; Django migrations own app persistence.
+  run.bat / setup.bat               Windows development setup and launch helpers.
+
+Django app map (models.py, views.py, forms.py where present, urls.py, admin.py,
+apps.py and migrations/ contain each app's models, UI/API, validation, routes,
+administration, registration and schema history):
+  accounts/                         Registration, login, profile, password flows, signals.
+  accounts_wallet/                  Wallets, balances and account transfers.
+  analytics/                        Financial calculations, charts and API views.
+  budgets/                          Budget models, validation and views.
+  core/                             Dashboard, shared context, audit log, APIs and sync.
+  debts/                             Debt/loan records and repayments.
+  goals/                             Savings goals and contributions.
+  notifications/                    In-app notifications and alert services.
+  reports/                          CSV/PDF/XLSX reports, imports and backups.
+  transactions/                     Categories, income, expenses and recurring records.
+
+Shared API and services:
+  core/api_urls.py                  API router and endpoint registrations.
+  core/api_views.py                 Authenticated CRUD APIs and offline sync endpoint.
+  core/serializers.py               Django REST Framework serialization/validation.
+  transactions/services.py          Upload validation and recurring helpers.
+  analytics/services.py             Financial analytics calculations.
+  reports/services.py               Report, import and backup support logic.
+  core/management/commands/seed_data.py  Default/demo data command.
+  transactions/management/commands/generate_recurring.py  Recurring transaction generator.
+
+UI, static assets and PWA:
+  templates/base.html               Authenticated shell and shared controls.
+  templates/auth_base.html           Authentication shell.
+  templates/{accounts,accounts_wallet,analytics,budgets,core,debts,goals,
+             notifications,reports,transactions}/  Feature pages and forms.
+  static/css/style.css              Shared responsive layout and theme styles.
+  static/js/main.js                 Theme, navigation, filters, toasts and install UI.
+  static/js/offline.js              Connection status, IndexedDB queue and sync client.
+  static/js/service-worker.js       Static/page/API caching and logout cache clearing.
+  static/manifest.json              PWA metadata and icon references.
+  static/vendor/                    Locally served Bootstrap, icons and Chart.js.
+  static/icons/                     PWA icon assets.
+
+Tests and documentation:
+  tests/test_analytics.py            Analytics service tests.
+  tests/test_api.py                  API, authorization, sync and idempotency tests.
+  tests/test_models.py               Model behavior tests.
+  tests/test_new_features.py          Wallet, debt and feature regression tests.
+  tests/test_permissions.py           User isolation and API permission tests.
+  tests/test_reports_import.py        Export and import tests.
+  tests/test_supabase_config.py       SQLite/PostgreSQL/Vercel config tests.
+  tests/test_views.py                 Landing, forms, dashboard and routing tests.
+  README.md / README.txt              Setup and feature documentation.
+  FEATURE OF SYSTEM.txt               Feature overview.
+  AUDIT REPORT.txt                    Historical audit entries and this current update.
+
+FINAL STATUS
+------------
+LOCAL SYSTEM: FIXED for Vercel database selection, root-scope PWA control, offline
+income/expense queueing, sync validation/idempotency, and the missing manifest asset.
+REGRESSION: 56 tests passed; Django, JavaScript and manifest checks passed.
+PRODUCTION: NEEDS ATTENTION; supplied Vercel domain is unassigned to a deployment and
+Supabase connectivity/schema could not be verified.
+FULL OFFLINE FEATURE SET: NEEDS ATTENTION; supported operations and limitations above.
+SCHEMA DRIFT: NEEDS ATTENTION; review existing model/migration differences before deploy.
+
+================================================================================
+                  Historical audit follows; not current verification
+================================================================================
+
+================================================================================
         PFAMS — PERSONAL FINANCIAL ANALYTICS & MANAGEMENT SYSTEM
                       SYSTEM AUDIT REPORT — OFFICIAL DOCUMENT
 ================================================================================

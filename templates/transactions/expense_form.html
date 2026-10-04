@@ -13,7 +13,7 @@
         <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> {% trans "Back to List" %}</a>
       </div>
 
-      <form method="post" enctype="multipart/form-data" novalidate>
+      <form method="post" enctype="multipart/form-data" novalidate{% if not object %} data-offline-type="expense"{% endif %}>
         {% csrf_token %}
         {% if form.non_field_errors %}
           <div class="alert alert-danger py-2 small">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>

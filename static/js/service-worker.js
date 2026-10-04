@@ -1,11 +1,10 @@
 /* PFAMS Service Worker — Cache-first static, Network-first API */
-const CACHE_VERSION = 'pfams-v2';
-const STATIC_CACHE  = 'pfams-static-v2';
-const API_CACHE     = 'pfams-api-v2';
+const STATIC_CACHE  = 'pfams-static-v3';
+const API_CACHE     = 'pfams-api-v3';
+const PAGE_CACHE    = 'pfams-pages-v3';
 
 const STATIC_ASSETS = [
   '/',
-  '/dashboard/',
   '/static/css/style.css',
   '/static/js/main.js',
   '/static/js/offline.js',
@@ -33,7 +32,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(k => k !== STATIC_CACHE && k !== API_CACHE).map(k => caches.delete(k))
+        keys.filter(k => k.startsWith('pfams-') &&
+          ![STATIC_CACHE, API_CACHE, PAGE_CACHE].includes(k)
+        ).map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
   );
@@ -44,9 +45,17 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and cross-origin
-  if (request.method !== 'GET') return;
   if (url.origin !== self.location.origin) return;
+
+  if (request.method !== 'GET') {
+    if (url.pathname === '/accounts/logout/') {
+      event.respondWith(fetch(request).then(async response => {
+        if (response.ok || response.redirected) await clearPrivateCaches();
+        return response;
+      }));
+    }
+    return;
+  }
 
   // API requests — network first
   if (url.pathname.startsWith('/api/')) {
@@ -61,8 +70,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   // HTML pages — network first with offline fallback
-  event.respondWith(networkFirst(request, STATIC_CACHE));
+  event.respondWith(networkFirst(request, PAGE_CACHE));
 });
+
+async function clearPrivateCaches() {
+  await Promise.all([caches.delete(API_CACHE), caches.delete(PAGE_CACHE)]);
+}
 
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
@@ -81,7 +94,11 @@ async function networkFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   try {
     const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+    const isLogout = new URL(request.url).pathname === '/accounts/logout/';
+    if (response.ok && !isLogout) cache.put(request, response.clone());
+    if (isLogout && (response.ok || response.redirected)) {
+      await clearPrivateCaches();
+    }
     return response;
   } catch (err) {
     const cached = await cache.match(request);

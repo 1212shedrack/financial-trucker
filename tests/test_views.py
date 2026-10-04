@@ -25,6 +25,13 @@ class ViewsTestCase(TestCase):
         self.assertNotIn('cdn.jsdelivr.net', content)
         self.assertNotIn('fonts.googleapis.com', content)
 
+    def test_service_worker_is_served_with_root_scope_permission(self):
+        response = self.client.get(reverse('service_worker'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/javascript')
+        self.assertEqual(response['Service-Worker-Allowed'], '/')
+
     def test_dashboard_redirect_unauthenticated(self):
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 302)
@@ -33,6 +40,26 @@ class ViewsTestCase(TestCase):
         self.client.login(username='viewuser', password='viewpassword123')
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
+
+    def test_offline_queue_hook_is_only_on_create_forms(self):
+        self.client.login(username='viewuser', password='viewpassword123')
+
+        income_create = self.client.get(reverse('income_create'))
+        expense_create = self.client.get(reverse('expense_create'))
+        self.assertContains(income_create, 'data-offline-type="income"')
+        self.assertContains(expense_create, 'data-offline-type="expense"')
+
+        income = Income.objects.create(
+            user=self.user,
+            amount='1000',
+            source='Existing',
+            date=date.today(),
+            payment_method='cash',
+        )
+        income_edit = self.client.get(
+            reverse('income_edit', args=[income.pk])
+        )
+        self.assertNotContains(income_edit, 'data-offline-type=')
 
     def test_income_crud_views(self):
         self.client.login(username='viewuser', password='viewpassword123')

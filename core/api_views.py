@@ -1,3 +1,8 @@
+import hashlib
+import json
+import logging
+
+from django.db import IntegrityError, transaction
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,11 +12,14 @@ from transactions.models import Category, Income, Expense, RecurringTransaction
 from budgets.models import Budget
 from goals.models import FinancialGoal, GoalContribution
 from notifications.models import Notification
+from core.models import OfflineSyncReceipt
 from core.serializers import (
     CategorySerializer, IncomeSerializer, ExpenseSerializer,
     RecurringTransactionSerializer, BudgetSerializer,
     FinancialGoalSerializer, GoalContributionSerializer, NotificationSerializer
 )
+
+logger = logging.getLogger(__name__)
 
 
 class UserOwnedMixin:
@@ -155,49 +163,123 @@ class SyncView(APIView):
         operations = request.data.get('operations', [])
         if not isinstance(operations, list):
             return Response({'error': 'operations must be a list'}, status=400)
+        if len(operations) > 100:
+            return Response(
+                {'error': 'A maximum of 100 operations can be synced at once.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         synced = 0
         failed = 0
         results = []
 
         for op in operations:
+            client_id = op.get('client_id') if isinstance(op, dict) else None
             try:
                 result = self._process_operation(op, request.user)
-                results.append({'client_id': op.get('client_id'), 'status': 'ok', 'id': result})
+                results.append({
+                    'client_id': client_id,
+                    'status': 'ok',
+                    'id': result,
+                })
                 synced += 1
-            except Exception as e:
-                results.append({'client_id': op.get('client_id'), 'status': 'error', 'error': str(e)})
+            except SyncValidationError as error:
+                results.append({
+                    'client_id': client_id,
+                    'status': 'error',
+                    'error': 'Invalid transaction data.',
+                    'details': error.details,
+                })
+                failed += 1
+            except ValueError as error:
+                results.append({
+                    'client_id': client_id,
+                    'status': 'error',
+                    'error': str(error),
+                })
+                failed += 1
+            except Exception:
+                logger.exception('Unexpected offline sync failure')
+                results.append({
+                    'client_id': client_id,
+                    'status': 'error',
+                    'error': 'The operation could not be synchronized.',
+                })
                 failed += 1
 
         return Response({'synced': synced, 'failed': failed, 'results': results})
 
     def _process_operation(self, op, user):
-        from decimal import Decimal
-        from datetime import date as date_cls
+        if not isinstance(op, dict):
+            raise ValueError('Each operation must be an object.')
+        client_id = op.get('client_id')
+        if not isinstance(client_id, str) or not client_id.strip():
+            raise ValueError('Each operation requires a client_id.')
+        if len(client_id) > 120:
+            raise ValueError('client_id must be 120 characters or fewer.')
+
+        payload_hash = hashlib.sha256(
+            json.dumps(op, sort_keys=True, separators=(',', ':')).encode()
+        ).hexdigest()
+
+        try:
+            with transaction.atomic():
+                receipt = OfflineSyncReceipt.objects.filter(
+                    user=user,
+                    client_id=client_id,
+                ).first()
+                if receipt:
+                    if receipt.payload_hash != payload_hash:
+                        raise ValueError(
+                            'client_id was already used for different data.'
+                        )
+                    return receipt.record_id
+
+                record_id = self._create_operation(op, user)
+                OfflineSyncReceipt.objects.create(
+                    user=user,
+                    client_id=client_id,
+                    payload_hash=payload_hash,
+                    record_id=record_id,
+                )
+                return record_id
+        except IntegrityError:
+            receipt = OfflineSyncReceipt.objects.filter(
+                user=user,
+                client_id=client_id,
+            ).first()
+            if receipt and receipt.payload_hash == payload_hash:
+                return receipt.record_id
+            if receipt:
+                raise ValueError(
+                    'client_id was already used for different data.'
+                )
+            raise
+
+    def _create_operation(self, op, user):
+        from transactions.forms import ExpenseForm, IncomeForm
+
         op_type = op.get('type')
         op_action = op.get('action')
         data = op.get('data', {})
+        if not isinstance(data, dict):
+            raise ValueError('Operation data must be an object.')
 
-        if op_type == 'income':
-            if op_action == 'create':
-                inc = Income.objects.create(
-                    user=user,
-                    amount=Decimal(str(data.get('amount', 0))),
-                    source=data.get('source', 'Offline entry'),
-                    date=date_cls.fromisoformat(data.get('date', str(date_cls.today()))),
-                    payment_method=data.get('payment_method', 'cash'),
-                    description=data.get('description', ''),
-                )
-                return inc.id
-        elif op_type == 'expense':
-            if op_action == 'create':
-                exp = Expense.objects.create(
-                    user=user,
-                    amount=Decimal(str(data.get('amount', 0))),
-                    description=data.get('description', 'Offline entry'),
-                    date=date_cls.fromisoformat(data.get('date', str(date_cls.today()))),
-                    payment_method=data.get('payment_method', 'cash'),
-                    notes=data.get('notes', ''),
-                )
-                return exp.id
+        form_class = {
+            'income': IncomeForm,
+            'expense': ExpenseForm,
+        }.get(op_type)
+        if form_class and op_action == 'create':
+            form = form_class(data, user=user)
+            if not form.is_valid():
+                raise SyncValidationError(form.errors.get_json_data())
+            record = form.save(commit=False)
+            record.user = user
+            record.save()
+            return record.id
         raise ValueError(f'Unknown operation: {op_type}/{op_action}')
+
+
+class SyncValidationError(Exception):
+    def __init__(self, details):
+        self.details = details

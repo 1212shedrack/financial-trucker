@@ -79,3 +79,97 @@ class APITestCase(TestCase):
         self.assertEqual(res.data['synced'], 2)
         self.assertEqual(Expense.objects.filter(user=self.user, description='Offline grocery').count(), 1)
         self.assertEqual(Income.objects.filter(user=self.user, source='Offline freelance').count(), 1)
+
+    def test_offline_sync_retry_does_not_duplicate_record(self):
+        operation = {
+            'client_id': 'retry_expense_1',
+            'type': 'expense',
+            'action': 'create',
+            'data': {
+                'amount': '12000.00',
+                'description': 'Queued once',
+                'date': date.today().isoformat(),
+                'payment_method': 'cash',
+            },
+        }
+        payload = {'operations': [operation]}
+
+        first_response = self.client.post(
+            '/api/sync/', payload, format='json'
+        )
+        retry_response = self.client.post(
+            '/api/sync/', payload, format='json'
+        )
+
+        self.assertEqual(first_response.data['synced'], 1)
+        self.assertEqual(retry_response.data['synced'], 1)
+        self.assertEqual(
+            first_response.data['results'][0]['id'],
+            retry_response.data['results'][0]['id'],
+        )
+        self.assertEqual(
+            Expense.objects.filter(
+                user=self.user,
+                description='Queued once',
+            ).count(),
+            1,
+        )
+
+    def test_offline_sync_rejects_invalid_amount_without_storing_record(self):
+        response = self.client.post(
+            '/api/sync/',
+            {'operations': [{
+                'client_id': 'invalid_expense_1',
+                'type': 'expense',
+                'action': 'create',
+                'data': {
+                    'amount': '-1',
+                    'description': 'Invalid amount',
+                    'date': date.today().isoformat(),
+                    'payment_method': 'cash',
+                },
+            }]},
+            format='json',
+        )
+
+        self.assertEqual(response.data['failed'], 1)
+        self.assertEqual(response.data['results'][0]['status'], 'error')
+        self.assertEqual(
+            Expense.objects.filter(user=self.user).count(),
+            0,
+        )
+
+    def test_offline_sync_rejects_another_users_category(self):
+        other_user = User.objects.create_user(
+            username='otherapiuser',
+            email='other-api@example.com',
+            password='apipassword123',
+        )
+        category = Category.objects.create(
+            user=other_user,
+            name='Private category',
+            category_type='income',
+        )
+
+        response = self.client.post(
+            '/api/sync/',
+            {'operations': [{
+                'client_id': 'foreign_category_1',
+                'type': 'income',
+                'action': 'create',
+                'data': {
+                    'amount': '5000',
+                    'source': 'Offline entry',
+                    'date': date.today().isoformat(),
+                    'payment_method': 'cash',
+                    'category': str(category.pk),
+                },
+            }]},
+            format='json',
+        )
+
+        self.assertEqual(response.data['failed'], 1)
+        self.assertEqual(
+            Income.objects.filter(user=self.user).count(),
+            0,
+        )

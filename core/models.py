@@ -42,3 +42,23 @@ class AuditLog(models.Model):
     def __str__(self):
         username = self.user.username if self.user else 'Anonymous'
         return f"{username} — {self.action} at {self.timestamp}"
+
+
+class OfflineSyncReceipt(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='offline_sync_receipts',
+    )
+    client_id = models.CharField(max_length=120)
+    payload_hash = models.CharField(max_length=64)
+    record_id = models.PositiveBigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'client_id'],
+                name='uniq_sync_receipt_user_client',
+            ),
+        ]

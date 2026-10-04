@@ -2,8 +2,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import service_worker_view
 
 urlpatterns = [
+    path('service-worker.js', service_worker_view, name='service_worker'),
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),

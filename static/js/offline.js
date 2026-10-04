@@ -4,6 +4,10 @@ const DB = {
   dbName: 'pfams_offline',
   version: 1,
 
+  currentUserId() {
+    return document.body.dataset.userId || '';
+  },
+
   async open() {
     if (this.db) return this.db;
     return new Promise((resolve, reject) => {
@@ -21,11 +25,14 @@ const DB = {
   },
 
   async savePending(operation) {
+    const userId = this.currentUserId();
+    if (!userId) throw new Error('Sign in before saving offline transactions.');
     const db = await this.open();
     return new Promise((resolve, reject) => {
       const tx = db.transaction('pending_ops', 'readwrite');
       operation.client_id = operation.client_id || 'op_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       operation.queued_at = new Date().toISOString();
+      operation.user_id = userId;
       tx.objectStore('pending_ops').put(operation);
       tx.oncomplete = () => resolve(operation.client_id);
       tx.onerror = (e) => reject(e.target.error);
@@ -37,7 +44,11 @@ const DB = {
     return new Promise((resolve, reject) => {
       const tx = db.transaction('pending_ops', 'readonly');
       const req = tx.objectStore('pending_ops').getAll();
-      req.onsuccess = () => resolve(req.result);
+      req.onsuccess = () => resolve(
+        req.result
+          .filter(operation => operation.user_id === this.currentUserId())
+          .sort((left, right) => left.queued_at.localeCompare(right.queued_at))
+      );
       req.onerror = (e) => reject(e.target.error);
     });
   },
@@ -138,11 +149,20 @@ const SyncManager = {
           await DB.removePending(result.client_id);
         }
       }
+      const failed = (data.results || []).filter(
+        result => result.status !== 'ok'
+      ).length;
 
       const remaining = await DB.getPending();
       this.updateUI(remaining.length);
       if (data.synced > 0) {
         if (typeof Toast !== 'undefined') Toast.show(`Synced ${data.synced} offline transaction(s).`, 'success');
+      }
+      if (failed > 0 && typeof Toast !== 'undefined') {
+        Toast.show(
+          `${failed} queued transaction(s) could not sync and remain saved on this device.`,
+          'warning'
+        );
       }
     } catch (err) {
       console.warn('[PFAMS] Sync error:', err);
@@ -168,9 +188,60 @@ const SyncManager = {
     const pending = await DB.getPending();
     this.updateUI(pending.length);
     if (typeof Toast !== 'undefined') Toast.show('Saved offline. Will sync when online.', 'info');
+    if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
+      navigator.serviceWorker.ready
+        .then(registration => registration.sync.register('sync-transactions'))
+        .catch(() => {});
+    }
     return clientId;
   }
 };
+
+async function queueOfflineForm(event) {
+  const form = event.currentTarget;
+  if (navigator.onLine) return;
+  event.preventDefault();
+
+  if (!form.reportValidity()) return;
+  const fileInput = form.querySelector('input[type="file"]');
+  if (fileInput?.files.length && fileInput.files[0].size > 0) {
+    Toast.show('Attachments cannot be saved while offline. Reconnect and try again.', 'warning');
+    return;
+  }
+
+  const data = {};
+  for (const [key, value] of new FormData(form).entries()) {
+    if (key !== 'csrfmiddlewaretoken' && !(value instanceof File)) {
+      data[key] = value;
+    }
+  }
+  if (!data.amount || Number(data.amount) <= 0) {
+    Toast.show('Enter an amount greater than zero.', 'warning');
+    return;
+  }
+
+  try {
+    await SyncManager.queueOperation({
+      type: form.dataset.offlineType,
+      action: 'create',
+      data,
+    });
+    form.reset();
+    const dateInput = form.querySelector('input[name="date"]');
+    if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+    let notice = form.querySelector('[data-offline-queued]');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.dataset.offlineQueued = 'true';
+      notice.className = 'alert alert-info';
+      notice.setAttribute('role', 'status');
+      form.prepend(notice);
+    }
+    notice.textContent = 'Saved on this device. It will sync when you are back online.';
+  } catch (error) {
+    Toast.show(error.message || 'Could not save this transaction offline.', 'danger');
+  }
+}
 
 /* ── Init */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -180,6 +251,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Manual sync button
   document.getElementById('manual-sync-btn')?.addEventListener('click', () => SyncManager.syncNow());
+  document.querySelectorAll('form[data-offline-type]').forEach((form) => {
+    form.addEventListener('submit', queueOfflineForm);
+  });
+  navigator.serviceWorker?.addEventListener('message', (event) => {
+    if (event.data?.type === 'SYNC_NOW') SyncManager.syncNow();
+  });
 
   // If online and has pending, sync immediately
   if (ConnectionManager.isOnline && pending.length > 0) {
