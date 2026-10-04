@@ -84,6 +84,19 @@ class UserProfileForm(forms.ModelForm):
             'monthly_savings_target': _('Monthly Savings Target (TZS)'),
         }
 
+    def clean_profile_photo(self):
+        profile_photo = self.cleaned_data.get('profile_photo')
+        if profile_photo:
+            from transactions.services import validate_upload_file
+            try:
+                validate_upload_file(
+                    profile_photo,
+                    allowed_types={'image/jpeg', 'image/png', 'image/gif'},
+                )
+            except ValueError as error:
+                raise forms.ValidationError(str(error)) from error
+        return profile_photo
+
 
 class ChangePasswordForm(forms.Form):
     old_password = forms.CharField(

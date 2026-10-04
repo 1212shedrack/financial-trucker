@@ -7,14 +7,15 @@
 CURRENT STATUS
 --------------
 Local Django checks: PASS
-Automated tests: 56 passed, 0 failed
+Automated tests: 65 passed, 0 failed
 Local landing and registration pages: HTTP 200
 Offline landing-page reload: PASS after service-worker installation
 Mobile landing page at 390px: no horizontal overflow detected
 Supplied production URL: BLOCKED (Vercel DEPLOYMENT_NOT_FOUND)
 Supabase connection: NOT VERIFIED (production deployment unavailable)
 Migration consistency: NEEDS ATTENTION (existing model/migration drift)
-Offline transactions: PARTIAL (new income and expense creation only)
+Persistent uploads: CONFIGURED FOR SUPABASE STORAGE; live backend not verified
+Offline uploads: CODED FOR PROFILE PHOTOS, INCOME ATTACHMENTS, AND RECEIPTS
 
 SCOPE AND VERIFICATION EVIDENCE
 -------------------------------
@@ -25,7 +26,7 @@ audit claims. This was a code and local-runtime audit, not a penetration test or
 manual test of every screen and workflow.
 
   py manage.py check                         PASS
-  py manage.py test tests --verbosity=1      56 passed
+  py manage.py test tests --verbosity=1      65 passed
   node --check static/js/offline.js          PASS
   node --check static/js/service-worker.js   PASS
   PWA manifest JSON parse                    PASS
@@ -48,11 +49,13 @@ CONFIRMED PROBLEMS AND FIXES
    registered at root scope. Browser testing confirmed root scope and a cached
    landing page reload with network access disabled.
 
-3. The IndexedDB queue previously had no callers. New income and expense forms now
-   queue valid create operations while offline. Entries are scoped to the current
-   user, kept in queue order, retried when connectivity returns, and retained after
-   sync failures. Users receive a warning for failed items. Attachments cannot be
-   queued and are explicitly rejected while offline.
+3. The IndexedDB queue previously had no callers. New income and expense forms and
+  the profile form now queue valid operations while offline. Optional uploads are
+  saved as IndexedDB blobs and sent as multipart data through authenticated Django
+  sync; the browser never receives Supabase storage credentials. Entries are
+  scoped to the current user, kept in queue order, retried when connectivity
+  returns, and retained after sync failures. Uploads over 5 MB or with unsupported
+  types are rejected. Offline browser-to-Supabase storage was not live-tested.
 
 4. The sync API previously wrote unvalidated values, returned raw exception text,
    and could duplicate entries after a lost response. It now uses the existing
@@ -63,6 +66,15 @@ CONFIRMED PROBLEMS AND FIXES
 
 5. Successful logout now clears cached private HTML and API responses. The PWA
    manifest no longer references a dashboard screenshot absent from the repository.
+
+6. Profile photos, income attachments, and expense receipts previously used Django
+  FileSystemStorage under MEDIA_ROOT. Vercel's /var/task is read-only and ephemeral.
+  The default upload backend now switches to django-storages S3Storage on Vercel,
+  targeting Supabase's S3-compatible endpoint. Local development remains on
+  FileSystemStorage. Existing model upload_to paths and database file-name fields
+  remain unchanged, avoiding schema changes and preserving feature relationships.
+  The bucket must be private; object URLs are signed for 10 minutes and overwrite
+  is disabled. The service-role key is not used by this backend.
 
 DATABASE AND MIGRATIONS
 -----------------------
@@ -81,16 +93,18 @@ before enabling the updated sync endpoint there.
 OFFLINE AVAILABILITY AND LIMITATIONS
 ------------------------------------
 Verified or implemented: static shell caching; network-first page/API caching;
-offline landing reload; IndexedDB storage for new income/expense entries; reconnect
-sync; authenticated server validation; idempotent retries; preservation of failed
-entries; visible sync failure feedback.
+offline landing reload; IndexedDB storage for profile, income, and expense form
+operations including optional upload blobs; reconnect multipart sync; authenticated
+server validation; idempotent retries; preservation of failed entries; visible sync
+failure feedback.
 
-Not implemented or verified: offline edits/deletes, wallets/accounts/transfers,
-budgets, goals, debts, recurring transactions, receipt uploads, and offline login.
-Only income and expense creation is currently queued. Pending financial entries are
-stored in browser IndexedDB without encryption; do not use this feature on shared
-or untrusted browser profiles. Full authenticated browser-to-Supabase synchronization
-was not tested because the production deployment is unavailable.
+Not implemented or verified: offline edits/deletes for financial records,
+wallets/accounts/transfers, budgets, goals, debts, recurring transactions, or offline
+login. Profile edits are queued. Pending profile/financial data and optional upload
+blobs are stored in browser IndexedDB without encryption; do not use this feature on
+shared or untrusted browser profiles. Full authenticated browser-to-Supabase
+synchronization was not tested because production and the storage dependency were
+unavailable in this offline workspace.
 
 PRODUCTION AND MANUAL ACTIONS
 -----------------------------
@@ -109,8 +123,30 @@ Before production sync is enabled:
     migration process. Do not automatically apply the unreviewed AlterField drift.
   - Re-test registration, login, transaction creation, and sync on the actual domain.
 
-No package was installed. No Supabase data or remote schema was changed. Vercel
-project/domain configuration could not be changed from this workspace.
+Production file storage configuration requires these server-only Vercel variables:
+  - USE_SUPABASE_STORAGE=true (defaults on when VERCEL is set)
+  - SUPABASE_URL=https://<project-ref>.supabase.co
+  - SUPABASE_STORAGE_BUCKET=<existing private bucket name>
+  - SUPABASE_S3_ACCESS_KEY_ID=<Supabase Storage S3 access key>
+  - SUPABASE_S3_SECRET_ACCESS_KEY=<matching S3 secret>
+  - SUPABASE_S3_ENDPOINT (optional; defaults to the project's direct storage host:
+    https://<project-ref>.storage.supabase.co/storage/v1/s3)
+  - SUPABASE_S3_REGION=<region copied from the Supabase S3 configuration page>
+
+Enable S3 protocol access in Supabase Storage settings and generate the S3 endpoint,
+region, access key, and secret from that project's Storage S3 configuration. Bucket
+existence and policies could not be inspected because no Supabase credentials are
+configured locally. Reuse an existing private bucket if available; otherwise create
+the configured bucket once in Supabase. Do not use the service-role key as a
+browser credential or expose S3 keys in frontend code. Supabase S3 access keys grant
+broad access to the project and bypass Storage RLS; protect them as high-privilege
+server secrets. Django authenticates and authorizes each application request before
+returning a short-lived signed object URL.
+
+django-storages[s3]==1.14.6 is declared in requirements.txt and pyproject.toml, but
+could not be installed in this offline workspace because the package index was
+unreachable. No Supabase data or remote schema was changed. Vercel project/domain
+configuration and production upload persistence could not be verified here.
 
 IMPORTANT FILE INVENTORY
 ------------------------
@@ -121,7 +157,7 @@ Runtime and deployment:
   personal_finance/asgi.py         ASGI application entrypoint used by Vercel.
   personal_finance/wsgi.py         WSGI entrypoint for conventional servers.
   pyproject.toml                   Python metadata and Vercel ASGI entrypoint.
-  requirements.txt                 Python runtime dependencies, including psycopg2.
+  requirements.txt                 Python runtime dependencies, including psycopg2 and django-storages.
   .env.example                     Local and Supabase environment-variable template.
   package.json / package-lock.json Prisma tooling; not Django's runtime database layer.
   prisma/schema.prisma             Prisma schema; Django migrations own app persistence.
@@ -130,7 +166,7 @@ Runtime and deployment:
 Django app map (models.py, views.py, forms.py where present, urls.py, admin.py,
 apps.py and migrations/ contain each app's models, UI/API, validation, routes,
 administration, registration and schema history):
-  accounts/                         Registration, login, profile, password flows, signals.
+  accounts/                         Registration, login, profile, password flows, signals, photo upload.
   accounts_wallet/                  Wallets, balances and account transfers.
   analytics/                        Financial calculations, charts and API views.
   budgets/                          Budget models, validation and views.
@@ -181,10 +217,11 @@ FINAL STATUS
 ------------
 LOCAL SYSTEM: FIXED for Vercel database selection, root-scope PWA control, offline
 income/expense queueing, sync validation/idempotency, and the missing manifest asset.
-REGRESSION: 56 tests passed; Django, JavaScript and manifest checks passed.
-PRODUCTION: NEEDS ATTENTION; supplied Vercel domain is unassigned to a deployment and
-Supabase connectivity/schema could not be verified.
-FULL OFFLINE FEATURE SET: NEEDS ATTENTION; supported operations and limitations above.
+REGRESSION: 65 tests passed, including profile/receipt upload validation, multipart
+sync/idempotency, storage failure handling, and local/remote backend configuration.
+PRODUCTION: NEEDS ATTENTION; supplied Vercel domain is unassigned to a deployment;
+Supabase Storage package install, bucket/policy, and persistence could not be verified.
+FULL OFFLINE FEATURE SET: NEEDS ATTENTION; operations and limitations above.
 SCHEMA DRIFT: NEEDS ATTENTION; review existing model/migration differences before deploy.
 
 ================================================================================

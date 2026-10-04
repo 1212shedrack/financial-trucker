@@ -93,7 +93,18 @@ class IncomeCreateView(LoginRequiredMixin, View):
                     validate_upload_file(form.cleaned_data['attachment'])
                 income = form.save(commit=False)
                 income.user = request.user
-                income.save()
+                try:
+                    income.save()
+                except Exception:
+                    logger.exception('Failed to save income or attachment')
+                    form.add_error(
+                        None,
+                        'Income could not be saved. Please try again.',
+                    )
+                    return render(request, self.template_name, {
+                        'form': form,
+                        'action': 'Add',
+                    })
                 log_action(request.user, 'CREATE', f'Income: {income.source} TSh {income.amount:,.0f}', request)
                 messages.success(request, f'Income of TSh {income.amount:,.0f} added.')
                 from notifications.services import send_budget_alerts
@@ -120,7 +131,19 @@ class IncomeUpdateView(LoginRequiredMixin, View):
             try:
                 if form.cleaned_data.get('attachment'):
                     validate_upload_file(form.cleaned_data['attachment'])
-                updated = form.save()
+                try:
+                    updated = form.save()
+                except Exception:
+                    logger.exception('Failed to update income or attachment')
+                    form.add_error(
+                        None,
+                        'Income could not be saved. Please try again.',
+                    )
+                    return render(request, self.template_name, {
+                        'form': form,
+                        'action': 'Edit',
+                        'object': income,
+                    })
                 log_action(request.user, 'UPDATE', f'Updated income: {updated.source}', request)
                 messages.success(request, 'Income updated.')
                 return redirect('income_list')
@@ -193,7 +216,18 @@ class ExpenseCreateView(LoginRequiredMixin, View):
                     validate_upload_file(form.cleaned_data['receipt'])
                 expense = form.save(commit=False)
                 expense.user = request.user
-                expense.save()
+                try:
+                    expense.save()
+                except Exception:
+                    logger.exception('Failed to save expense or receipt')
+                    form.add_error(
+                        None,
+                        'Expense could not be saved. Please try again.',
+                    )
+                    return render(request, self.template_name, {
+                        'form': form,
+                        'action': 'Add',
+                    })
                 log_action(request.user, 'CREATE', f'Expense: {expense.description} TSh {expense.amount:,.0f}', request)
                 messages.success(request, f'Expense of TSh {expense.amount:,.0f} added.')
                 from notifications.services import send_budget_alerts
@@ -220,7 +254,19 @@ class ExpenseUpdateView(LoginRequiredMixin, View):
             try:
                 if form.cleaned_data.get('receipt'):
                     validate_upload_file(form.cleaned_data['receipt'])
-                updated = form.save()
+                try:
+                    updated = form.save()
+                except Exception:
+                    logger.exception('Failed to update expense or receipt')
+                    form.add_error(
+                        None,
+                        'Expense could not be saved. Please try again.',
+                    )
+                    return render(request, self.template_name, {
+                        'form': form,
+                        'action': 'Edit',
+                        'object': expense,
+                    })
                 log_action(request.user, 'UPDATE', f'Updated expense: {updated.description}', request)
                 messages.success(request, 'Expense updated.')
                 return redirect('expense_list')

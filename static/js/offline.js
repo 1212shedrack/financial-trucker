@@ -132,13 +132,32 @@ const SyncManager = {
       const csrfToken = document.cookie.split('; ')
         .find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
 
+      const body = new FormData();
+      body.append('operations', JSON.stringify(pending.map(operation => {
+        const payload = { ...operation };
+        delete payload.user_id;
+        delete payload.queued_at;
+        delete payload.file;
+        if (operation.file?.blob) {
+          const fileKey = `upload_${operation.client_id}`;
+          payload.file_key = fileKey;
+          payload.file_field = operation.file.field;
+          body.append(
+            fileKey,
+            new File([operation.file.blob], operation.file.name, {
+              type: operation.file.type,
+            })
+          );
+        }
+        return payload;
+      })));
+
       const res = await fetch('/api/sync/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken,
         },
-        body: JSON.stringify({ operations: pending })
+        body,
       });
 
       if (!res.ok) throw new Error('Sync failed: ' + res.status);
@@ -203,19 +222,36 @@ async function queueOfflineForm(event) {
   event.preventDefault();
 
   if (!form.reportValidity()) return;
-  const fileInput = form.querySelector('input[type="file"]');
-  if (fileInput?.files.length && fileInput.files[0].size > 0) {
-    Toast.show('Attachments cannot be saved while offline. Reconnect and try again.', 'warning');
-    return;
-  }
 
   const data = {};
+  let queuedFile = null;
   for (const [key, value] of new FormData(form).entries()) {
-    if (key !== 'csrfmiddlewaretoken' && !(value instanceof File)) {
+    if (value instanceof File && value.size > 0) {
+      const allowedTypes = form.dataset.offlineType === 'profile'
+        ? ['image/jpeg', 'image/png', 'image/gif']
+        : ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+      if (value.size > 5242880 || !allowedTypes.includes(value.type)) {
+        Toast.show('Choose an allowed file smaller than 5 MB.', 'warning');
+        return;
+      }
+      queuedFile = {
+        blob: value,
+        name: value.name,
+        type: value.type,
+        field: {
+          income: 'attachment',
+          expense: 'receipt',
+          profile: 'profile_photo',
+        }[form.dataset.offlineType],
+      };
+    } else if (!(value instanceof File) && key !== 'csrfmiddlewaretoken') {
       data[key] = value;
     }
   }
-  if (!data.amount || Number(data.amount) <= 0) {
+  if (
+    ['income', 'expense'].includes(form.dataset.offlineType) &&
+    (!data.amount || Number(data.amount) <= 0)
+  ) {
     Toast.show('Enter an amount greater than zero.', 'warning');
     return;
   }
@@ -223,12 +259,15 @@ async function queueOfflineForm(event) {
   try {
     await SyncManager.queueOperation({
       type: form.dataset.offlineType,
-      action: 'create',
+      action: form.dataset.offlineType === 'profile' ? 'update' : 'create',
       data,
+      file: queuedFile,
     });
-    form.reset();
-    const dateInput = form.querySelector('input[name="date"]');
-    if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+    if (form.dataset.offlineType !== 'profile') {
+      form.reset();
+      const dateInput = form.querySelector('input[name="date"]');
+      if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+    }
     let notice = form.querySelector('[data-offline-queued]');
     if (!notice) {
       notice = document.createElement('div');

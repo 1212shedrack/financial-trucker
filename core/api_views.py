@@ -13,6 +13,7 @@ from budgets.models import Budget
 from goals.models import FinancialGoal, GoalContribution
 from notifications.models import Notification
 from core.models import OfflineSyncReceipt
+from transactions.services import validate_upload_file
 from core.serializers import (
     CategorySerializer, IncomeSerializer, ExpenseSerializer,
     RecurringTransactionSerializer, BudgetSerializer,
@@ -161,6 +162,14 @@ class SyncView(APIView):
 
     def post(self, request):
         operations = request.data.get('operations', [])
+        if isinstance(operations, str):
+            try:
+                operations = json.loads(operations)
+            except json.JSONDecodeError:
+                return Response(
+                    {'error': 'operations must contain valid JSON.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         if not isinstance(operations, list):
             return Response({'error': 'operations must be a list'}, status=400)
         if len(operations) > 100:
@@ -176,7 +185,11 @@ class SyncView(APIView):
         for op in operations:
             client_id = op.get('client_id') if isinstance(op, dict) else None
             try:
-                result = self._process_operation(op, request.user)
+                result = self._process_operation(
+                    op,
+                    request.user,
+                    request.FILES,
+                )
                 results.append({
                     'client_id': client_id,
                     'status': 'ok',
@@ -209,7 +222,8 @@ class SyncView(APIView):
 
         return Response({'synced': synced, 'failed': failed, 'results': results})
 
-    def _process_operation(self, op, user):
+    def _process_operation(self, op, user, files=None):
+        files = files or {}
         if not isinstance(op, dict):
             raise ValueError('Each operation must be an object.')
         client_id = op.get('client_id')
@@ -218,9 +232,19 @@ class SyncView(APIView):
         if len(client_id) > 120:
             raise ValueError('client_id must be 120 characters or fewer.')
 
-        payload_hash = hashlib.sha256(
+        file_key = op.get('file_key')
+        upload = files.get(file_key) if isinstance(file_key, str) else None
+        if file_key and upload is None:
+            raise ValueError('The queued upload is missing its file data.')
+        digest = hashlib.sha256()
+        digest.update(
             json.dumps(op, sort_keys=True, separators=(',', ':')).encode()
-        ).hexdigest()
+        )
+        if upload:
+            for chunk in upload.chunks():
+                digest.update(chunk)
+            upload.seek(0)
+        payload_hash = digest.hexdigest()
 
         try:
             with transaction.atomic():
@@ -235,7 +259,7 @@ class SyncView(APIView):
                         )
                     return receipt.record_id
 
-                record_id = self._create_operation(op, user)
+                record_id = self._create_operation(op, user, upload)
                 OfflineSyncReceipt.objects.create(
                     user=user,
                     client_id=client_id,
@@ -256,7 +280,7 @@ class SyncView(APIView):
                 )
             raise
 
-    def _create_operation(self, op, user):
+    def _create_operation(self, op, user, upload=None):
         from transactions.forms import ExpenseForm, IncomeForm
 
         op_type = op.get('type')
@@ -265,12 +289,36 @@ class SyncView(APIView):
         if not isinstance(data, dict):
             raise ValueError('Operation data must be an object.')
 
+        expected_file_field = {
+            'income': 'attachment',
+            'expense': 'receipt',
+            'profile': 'profile_photo',
+        }.get(op_type)
+        file_field = op.get('file_field')
+        if upload and file_field != expected_file_field:
+            raise ValueError('The uploaded file field is invalid.')
+        form_files = {}
+        if upload:
+            validate_upload_file(upload)
+            form_files[file_field] = upload
+
+        if op_type == 'profile' and op_action == 'update':
+            from accounts.forms import UserProfileForm
+            form = UserProfileForm(
+                data,
+                files=form_files,
+                instance=user.profile,
+            )
+            if not form.is_valid():
+                raise SyncValidationError(form.errors.get_json_data())
+            return form.save().pk
+
         form_class = {
             'income': IncomeForm,
             'expense': ExpenseForm,
         }.get(op_type)
         if form_class and op_action == 'create':
-            form = form_class(data, user=user)
+            form = form_class(data, files=form_files, user=user)
             if not form.is_valid():
                 raise SyncValidationError(form.errors.get_json_data())
             record = form.save(commit=False)

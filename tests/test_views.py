@@ -1,6 +1,10 @@
+from io import BytesIO
 from decimal import Decimal
 from datetime import date, timedelta
-from django.test import TestCase, Client
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import User
 from transactions.models import Category, Income, Expense
@@ -60,6 +64,92 @@ class ViewsTestCase(TestCase):
             reverse('income_edit', args=[income.pk])
         )
         self.assertNotContains(income_edit, 'data-offline-type=')
+
+    def test_profile_photo_upload_validates_image_content(self):
+        from PIL import Image
+        from accounts.forms import UserProfileForm
+
+        image_bytes = BytesIO()
+        Image.new('RGB', (1, 1), color='green').save(image_bytes, format='PNG')
+        profile_data = {
+            'full_name': '',
+            'phone_number': '',
+            'preferred_currency': 'TZS',
+            'timezone': 'Africa/Dar_es_Salaam',
+            'monthly_income_target': '0',
+            'monthly_savings_target': '0',
+        }
+        valid_form = UserProfileForm(
+            data=profile_data,
+            files={
+                'profile_photo': SimpleUploadedFile(
+                    'profile.png',
+                    image_bytes.getvalue(),
+                    content_type='image/png',
+                ),
+            },
+            instance=self.user.profile,
+        )
+        self.assertTrue(valid_form.is_valid(), valid_form.errors)
+        with TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                profile = valid_form.save()
+                self.assertTrue(
+                    profile.profile_photo.storage.exists(
+                        profile.profile_photo.name
+                    )
+                )
+
+        spoofed_form = UserProfileForm(
+            data=profile_data,
+            files={
+                'profile_photo': SimpleUploadedFile(
+                    'profile.png',
+                    b'not an image',
+                    content_type='image/png',
+                ),
+            },
+            instance=self.user.profile,
+        )
+        self.assertFalse(spoofed_form.is_valid())
+
+    def test_profile_storage_failure_returns_form_error(self):
+        self.client.login(username='viewuser', password='viewpassword123')
+        profile_data = {
+            'full_name': 'View User',
+            'phone_number': '',
+            'preferred_currency': 'TZS',
+            'timezone': 'Africa/Dar_es_Salaam',
+            'monthly_income_target': '0',
+            'monthly_savings_target': '0',
+        }
+
+        with patch(
+            'accounts.views.UserProfileForm.save',
+            side_effect=OSError('storage is unavailable'),
+        ):
+            response = self.client.post(reverse('profile'), profile_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Profile could not be saved.')
+
+    def test_income_storage_failure_returns_form_error(self):
+        self.client.login(username='viewuser', password='viewpassword123')
+        income_data = {
+            'amount': '300000',
+            'source': 'Consulting Work',
+            'date': date.today().isoformat(),
+            'payment_method': 'mpesa',
+        }
+
+        with patch(
+            'transactions.views.Income.save',
+            side_effect=OSError('storage is unavailable'),
+        ):
+            response = self.client.post(reverse('income_create'), income_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Income could not be saved.')
 
     def test_income_crud_views(self):
         self.client.login(username='viewuser', password='viewpassword123')

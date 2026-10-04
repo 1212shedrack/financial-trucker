@@ -103,7 +103,15 @@ class ProfileView(View):
             return redirect('login')
         form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
-            form.save()
+            try:
+                form.save()
+            except Exception:
+                logger.exception('Failed to save profile update or photo')
+                form.add_error(
+                    None,
+                    'Profile could not be saved. Please try again.',
+                )
+                return render(request, self.template_name, {'form': form})
             log_action(request.user, 'PROFILE_UPDATE', 'User updated profile', request)
             messages.success(request, 'Profile updated successfully.')
             return redirect('profile')

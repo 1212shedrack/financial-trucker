@@ -7,6 +7,46 @@ import personal_finance.settings as settings_module
 
 
 class SupabaseDatabaseConfigTests(SimpleTestCase):
+    def test_supabase_s3_endpoint_uses_direct_storage_hostname(self):
+        endpoint = settings_module.build_supabase_s3_endpoint(
+            'https://project-ref.supabase.co'
+        )
+
+        self.assertEqual(
+            endpoint,
+            'https://project-ref.storage.supabase.co/storage/v1/s3',
+        )
+
+    def test_local_file_storage_remains_the_default_outside_vercel(self):
+        with patch.object(settings_module, 'USE_SUPABASE_STORAGE', False):
+            storage = settings_module.build_default_storage_config()
+
+        self.assertEqual(
+            storage['BACKEND'],
+            'django.core.files.storage.FileSystemStorage',
+        )
+
+    def test_supabase_storage_uses_private_signed_s3_urls(self):
+        with patch.multiple(
+            settings_module,
+            create=True,
+            USE_SUPABASE_STORAGE=True,
+            SUPABASE_S3_ACCESS_KEY_ID='access-key',
+            SUPABASE_S3_SECRET_ACCESS_KEY='secret-key',
+            SUPABASE_STORAGE_BUCKET='private-uploads',
+            SUPABASE_S3_ENDPOINT=(
+                'https://project.supabase.co/storage/v1/s3'
+            ),
+            SUPABASE_S3_REGION='us-east-1',
+        ):
+            storage = settings_module.build_default_storage_config()
+
+        self.assertEqual(storage['BACKEND'], 'storages.backends.s3.S3Storage')
+        self.assertEqual(storage['OPTIONS']['bucket_name'], 'private-uploads')
+        self.assertTrue(storage['OPTIONS']['querystring_auth'])
+        self.assertIsNone(storage['OPTIONS']['default_acl'])
+        self.assertFalse(storage['OPTIONS']['file_overwrite'])
+
     def test_sqlite_is_default_when_postgres_url_is_configured(self):
         config_values = {
             'DATABASE_URL': (

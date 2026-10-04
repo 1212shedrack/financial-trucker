@@ -4,7 +4,7 @@ Django settings for Personal Financial Analytics and Management System (PFAMS).
 
 # import os
 from pathlib import Path
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, urlparse, urlunparse
 
 from decouple import config, Csv
 from django.core.exceptions import ImproperlyConfigured
@@ -76,7 +76,87 @@ def build_database_config():
     }
 
 
+def build_supabase_s3_endpoint(project_url):
+    parsed = urlparse(project_url)
+    hostname = parsed.hostname or ''
+    if hostname.endswith('.supabase.co'):
+        hostname = (
+            hostname[:-len('.supabase.co')] + '.storage.supabase.co'
+        )
+        return urlunparse((
+            parsed.scheme,
+            hostname,
+            '/storage/v1/s3',
+            '',
+            '',
+            '',
+        ))
+    return f'{project_url.rstrip("/")}/storage/v1/s3'
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+IS_VERCEL = config('VERCEL', default=False, cast=bool)
+USE_SUPABASE_STORAGE = config(
+    'USE_SUPABASE_STORAGE',
+    default=IS_VERCEL,
+    cast=bool,
+)
+SUPABASE_URL = config('SUPABASE_URL', default='').rstrip('/')
+
+if USE_SUPABASE_STORAGE:
+    SUPABASE_S3_ACCESS_KEY_ID = config(
+        'SUPABASE_S3_ACCESS_KEY_ID', default=''
+    )
+    SUPABASE_S3_SECRET_ACCESS_KEY = config(
+        'SUPABASE_S3_SECRET_ACCESS_KEY', default=''
+    )
+    SUPABASE_STORAGE_BUCKET = config('SUPABASE_STORAGE_BUCKET', default='')
+    SUPABASE_S3_REGION = config('SUPABASE_S3_REGION', default='')
+    SUPABASE_S3_ENDPOINT = config(
+        'SUPABASE_S3_ENDPOINT',
+        default=(
+            build_supabase_s3_endpoint(SUPABASE_URL)
+            if SUPABASE_URL else ''
+        ),
+    )
+    if not all((
+        SUPABASE_URL,
+        SUPABASE_S3_ACCESS_KEY_ID,
+        SUPABASE_S3_SECRET_ACCESS_KEY,
+        SUPABASE_STORAGE_BUCKET,
+        SUPABASE_S3_REGION,
+        SUPABASE_S3_ENDPOINT,
+    )):
+        raise ImproperlyConfigured(
+            'Supabase Storage requires SUPABASE_URL, '
+            'SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY, '
+            'SUPABASE_STORAGE_BUCKET, SUPABASE_S3_REGION, and endpoint.'
+        )
+
+
+def build_default_storage_config():
+    if not USE_SUPABASE_STORAGE:
+        return {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        }
+
+    return {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'access_key': SUPABASE_S3_ACCESS_KEY_ID,
+            'secret_key': SUPABASE_S3_SECRET_ACCESS_KEY,
+            'bucket_name': SUPABASE_STORAGE_BUCKET,
+            'endpoint_url': SUPABASE_S3_ENDPOINT,
+            'region_name': SUPABASE_S3_REGION,
+            'addressing_style': 'path',
+            'signature_version': 's3v4',
+            'querystring_auth': True,
+            'querystring_expire': 600,
+            'default_acl': None,
+            'file_overwrite': False,
+        },
+    }
+
 
 SECRET_KEY = config(
     'SECRET_KEY',
@@ -113,6 +193,8 @@ LOCAL_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+if USE_SUPABASE_STORAGE:
+    INSTALLED_APPS.append('storages')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -202,9 +284,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
-    'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
-    },
+    'default': build_default_storage_config(),
     'staticfiles': {
         'BACKEND': (
             'django.contrib.staticfiles.storage.StaticFilesStorage'

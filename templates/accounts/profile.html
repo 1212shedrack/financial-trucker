@@ -37,8 +37,13 @@
   <div class="col-lg-8">
     <div class="card shadow-sm p-4">
       <h5 class="fw-bold mb-4">{% trans "Edit Profile" %}</h5>
-      <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" data-offline-type="profile">
         {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small" role="alert">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label small fw-semibold">{% trans "Full Name" %}</label>

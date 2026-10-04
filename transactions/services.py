@@ -79,12 +79,36 @@ def advance_recurring_due_date(recurring):
     recurring.save(update_fields=['next_due_date'])
 
 
-def validate_upload_file(f):
-    """Validate uploaded file size and type. Raises ValueError on failure."""
+def validate_upload_file(f, allowed_types=None):
+    """Validate upload size, declared type, and basic file signature."""
     from django.conf import settings
     if f.size > settings.MAX_UPLOAD_SIZE:
-        raise ValueError(f'File size exceeds 5MB limit.')
-    allowed = settings.ALLOWED_IMAGE_TYPES + settings.ALLOWED_DOCUMENT_TYPES
+        raise ValueError('File size exceeds 5MB limit.')
+    allowed = allowed_types or (
+        settings.ALLOWED_IMAGE_TYPES + settings.ALLOWED_DOCUMENT_TYPES
+    )
     content_type = getattr(f, 'content_type', '')
-    if content_type and content_type not in allowed:
+    if content_type not in allowed:
         raise ValueError(f'File type "{content_type}" is not allowed.')
+
+    if content_type in settings.ALLOWED_IMAGE_TYPES:
+        from PIL import Image, UnidentifiedImageError
+        try:
+            image = Image.open(f)
+            image.verify()
+            actual_type = {
+                'JPEG': 'image/jpeg',
+                'PNG': 'image/png',
+                'GIF': 'image/gif',
+            }.get(image.format)
+            if actual_type != content_type:
+                raise ValueError('Image content does not match its file type.')
+        except (UnidentifiedImageError, OSError) as error:
+            raise ValueError('The uploaded image is invalid.') from error
+        finally:
+            f.seek(0)
+    elif content_type == 'application/pdf':
+        if f.read(5) != b'%PDF-':
+            f.seek(0)
+            raise ValueError('The uploaded PDF is invalid.')
+        f.seek(0)
