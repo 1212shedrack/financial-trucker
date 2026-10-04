@@ -7,11 +7,25 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
 
 from decouple import config, Csv
+
+
 def build_database_config():
-    """Return a Django DATABASES config that supports SQLite or Supabase PostgreSQL."""
+    """Return a Django DATABASES config
+    that supports SQLite or Supabase PostgreSQL."""
     default_engine = 'django.db.backends.sqlite3'
     db_engine = config('DB_ENGINE', default=default_engine)
     database_url = config('DATABASE_URL', default='')
+
+    if db_engine == 'django.db.backends.sqlite3':
+        return {
+            'ENGINE': db_engine,
+            'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
+            'USER': config('DB_USER', default=''),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default=''),
+            'PORT': config('DB_PORT', default=''),
+            'OPTIONS': {'timeout': 20},
+        }
 
     if database_url:
         try:
@@ -27,27 +41,20 @@ def build_database_config():
             parsed = urlparse(escaped_url)
 
         query_params = parse_qs(parsed.query)
-        ssl_mode = query_params.get('sslmode', [config('DB_SSLMODE', default='require')])[0]
+        ssl_mode = query_params.get(
+            'sslmode', [config('DB_SSLMODE', default='require')])[0]
 
         return {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': parsed.path.lstrip('/') or config('DB_NAME', default='postgres'),
+            'NAME': (
+                parsed.path.lstrip('/')
+                or config('DB_NAME', default='postgres')
+            ),
             'USER': parsed.username or config('DB_USER', default='postgres'),
             'PASSWORD': parsed.password or config('DB_PASSWORD', default=''),
             'HOST': parsed.hostname or config('DB_HOST', default='localhost'),
             'PORT': str(parsed.port or config('DB_PORT', default='5432')),
             'OPTIONS': {'sslmode': ssl_mode},
-        }
-
-    if db_engine == 'django.db.backends.sqlite3':
-        return {
-            'ENGINE': db_engine,
-            'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
-            'USER': config('DB_USER', default=''),
-            'PASSWORD': config('DB_PASSWORD', default=''),
-            'HOST': config('DB_HOST', default=''),
-            'PORT': config('DB_PORT', default=''),
-            'OPTIONS': {'timeout': 20},
         }
 
     return {
@@ -59,6 +66,7 @@ def build_database_config():
         'PORT': config('DB_PORT', default='5432'),
         'OPTIONS': {'sslmode': config('DB_SSLMODE', default='require')},
     }
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
