@@ -7,7 +7,6 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse, urlunparse
 
 from decouple import config, Csv
-from django.core.exceptions import ImproperlyConfigured
 
 
 def build_database_config():
@@ -60,10 +59,17 @@ def build_database_config():
         }
 
     if is_vercel:
-        raise ImproperlyConfigured(
-            'DATABASE_URL must be set on Vercel; SQLite is not supported '
-            'for persistent production data.'
-        )
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='postgres'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+            'OPTIONS': {
+                'sslmode': config('DB_SSLMODE', default='require'),
+            },
+        }
 
     return {
         'ENGINE': db_engine,
@@ -102,6 +108,7 @@ USE_SUPABASE_STORAGE = config(
     cast=bool,
 )
 SUPABASE_URL = config('SUPABASE_URL', default='').rstrip('/')
+SUPABASE_STORAGE_CONFIGURED = False
 
 if USE_SUPABASE_STORAGE:
     SUPABASE_S3_ACCESS_KEY_ID = config(
@@ -119,22 +126,27 @@ if USE_SUPABASE_STORAGE:
             if SUPABASE_URL else ''
         ),
     )
-    if not all((
+    SUPABASE_STORAGE_CONFIGURED = all((
         SUPABASE_URL,
         SUPABASE_S3_ACCESS_KEY_ID,
         SUPABASE_S3_SECRET_ACCESS_KEY,
         SUPABASE_STORAGE_BUCKET,
         SUPABASE_S3_REGION,
         SUPABASE_S3_ENDPOINT,
-    )):
-        raise ImproperlyConfigured(
-            'Supabase Storage requires SUPABASE_URL, '
-            'SUPABASE_S3_ACCESS_KEY_ID, SUPABASE_S3_SECRET_ACCESS_KEY, '
-            'SUPABASE_STORAGE_BUCKET, SUPABASE_S3_REGION, and endpoint.'
-        )
+    ))
 
 
 def build_default_storage_config():
+    if USE_SUPABASE_STORAGE and not SUPABASE_STORAGE_CONFIGURED:
+        return {
+            'BACKEND': 'core.storage.UnconfiguredStorage',
+        }
+
+    if IS_VERCEL and not SUPABASE_STORAGE_CONFIGURED:
+        return {
+            'BACKEND': 'core.storage.UnconfiguredStorage',
+        }
+
     if not USE_SUPABASE_STORAGE:
         return {
             'BACKEND': 'django.core.files.storage.FileSystemStorage',
@@ -193,7 +205,7 @@ LOCAL_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-if USE_SUPABASE_STORAGE:
+if USE_SUPABASE_STORAGE and SUPABASE_STORAGE_CONFIGURED:
     INSTALLED_APPS.append('storages')
 
 MIDDLEWARE = [

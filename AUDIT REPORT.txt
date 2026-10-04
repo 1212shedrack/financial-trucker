@@ -39,10 +39,10 @@ CONFIRMED PROBLEMS AND FIXES
 ----------------------------
 1. Vercel previously selected SQLite, whose serverless filesystem is not a durable
    writable database. Production now selects PostgreSQL from DATABASE_URL when the
-   VERCEL environment flag is set. If the URL is missing, settings raise a clear
-   ImproperlyConfigured error. Local development continues to default to SQLite.
-   This code change does not prove the production environment variables or database
-   connectivity are correct.
+  VERCEL environment flag is set. Without DATABASE_URL, settings use a PostgreSQL
+  placeholder so the deployment can import/build without falling back to SQLite;
+  production database operations still require the real URL. Local development
+  continues to default to SQLite. Production database connectivity is unverified.
 
 2. The service worker was served below /static/js/, limiting control to that path.
    It is now served at /service-worker.js with Service-Worker-Allowed: / and is
@@ -132,6 +132,9 @@ Production file storage configuration requires these server-only Vercel variable
   - SUPABASE_S3_ENDPOINT (optional; defaults to the project's direct storage host:
     https://<project-ref>.storage.supabase.co/storage/v1/s3)
   - SUPABASE_S3_REGION=<region copied from the Supabase S3 configuration page>
+
+DATABASE_URL is also required for the deployed app to serve database-backed requests.
+The build-safe PostgreSQL placeholder is not a substitute for the real Supabase URL.
 
 Enable S3 protocol access in Supabase Storage settings and generate the S3 endpoint,
 region, access key, and secret from that project's Storage S3 configuration. Bucket

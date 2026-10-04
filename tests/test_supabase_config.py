@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase
 
 import personal_finance.settings as settings_module
@@ -26,11 +25,27 @@ class SupabaseDatabaseConfigTests(SimpleTestCase):
             'django.core.files.storage.FileSystemStorage',
         )
 
+    def test_vercel_without_storage_credentials_does_not_use_local_disk(self):
+        with patch.multiple(
+            settings_module,
+            IS_VERCEL=True,
+            USE_SUPABASE_STORAGE=True,
+            SUPABASE_STORAGE_CONFIGURED=False,
+            create=True,
+        ):
+            storage = settings_module.build_default_storage_config()
+
+        self.assertEqual(
+            storage['BACKEND'],
+            'core.storage.UnconfiguredStorage',
+        )
+
     def test_supabase_storage_uses_private_signed_s3_urls(self):
         with patch.multiple(
             settings_module,
             create=True,
             USE_SUPABASE_STORAGE=True,
+            SUPABASE_STORAGE_CONFIGURED=True,
             SUPABASE_S3_ACCESS_KEY_ID='access-key',
             SUPABASE_S3_SECRET_ACCESS_KEY='secret-key',
             SUPABASE_STORAGE_BUCKET='private-uploads',
@@ -92,7 +107,7 @@ class SupabaseDatabaseConfigTests(SimpleTestCase):
         )
         self.assertEqual(database_config['HOST'], 'db.example.supabase.co')
 
-    def test_vercel_requires_database_url(self):
+    def test_vercel_without_database_url_never_falls_back_to_sqlite(self):
         with patch.object(
             settings_module,
             'config',
@@ -100,11 +115,12 @@ class SupabaseDatabaseConfigTests(SimpleTestCase):
                 'VERCEL': True,
             }.get(key, default),
         ):
-            with self.assertRaisesMessage(
-                ImproperlyConfigured,
-                'DATABASE_URL must be set on Vercel',
-            ):
-                settings_module.build_database_config()
+            database_config = settings_module.build_database_config()
+
+        self.assertEqual(
+            database_config['ENGINE'],
+            'django.db.backends.postgresql',
+        )
 
     def test_build_database_config_supports_postgres_url(self):
         config_values = {
