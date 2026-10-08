@@ -178,6 +178,12 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS',
                        default='localhost,127.0.0.1',
                        cast=Csv())
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -243,6 +249,12 @@ WSGI_APPLICATION = 'personal_finance.wsgi.application'
 ASGI_APPLICATION = 'personal_finance.asgi.application'
 
 DATABASES = {'default': build_database_config()}
+# Supabase transaction-mode pooler (port 6543, pgbouncer=true) does NOT support
+# PostgreSQL server-side cursors. Django uses them by default for QuerySet
+# iteration (pagination, ListView, etc.), causing:
+#   InvalidCursorName: cursor "_django_curs_..." does not exist
+# This forces Django to use client-side cursors instead.
+DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -276,7 +288,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # Vercel handles SSL termination at the edge — enabling Django's
+    # SECURE_SSL_REDIRECT causes infinite redirect loops on Vercel.
+    SECURE_SSL_REDIRECT = not IS_VERCEL
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
